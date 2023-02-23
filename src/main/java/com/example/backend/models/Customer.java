@@ -3,10 +3,9 @@ package com.example.backend.models;
 
 import lombok.*;
 
+//import jakarta.persistence.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class User {
+public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -28,7 +27,7 @@ public class User {
 //            "[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")
 //    @NotEmpty(message = "Email cannot be empty")
     private String email;
-    @Column(unique = true)
+//    @Column(unique = true)
     private String login;
     private String password;
     private long phone_number;
@@ -43,8 +42,18 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "added_to_favorite_id"))
     private List<Realty_Object> added_to_favorites=new ArrayList<>();
 
-    public User(String email,String password) {
-        this.email=email;
-        this.password = password;
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", email='" + email + '\'' +
+                ", login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", phone_number=" + phone_number +
+                ", my_realty_objectList=" + my_realty_objectList +
+                ", added_to_favorites=" + added_to_favorites +
+                '}';
     }
 }
