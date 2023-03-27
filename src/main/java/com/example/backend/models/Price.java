@@ -25,8 +25,19 @@ public class Price {
     private Currency currency;
     @Enumerated(EnumType.STRING)
     private Type_Of_Order_Of_Real_Estate type_of_order_of_real_estate;
-    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    @JoinColumn(name = "realty_object_id",referencedColumnName = "id")
-    private Realty_Object realty_object;
+//    @OneToOne
+//    @JoinColumn(name = "realty_object_id",referencedColumnName = "id")
+//    private Realty_Object realty_object;
+//    (cascade = CascadeType.ALL,fetch = FetchType.EAGER)
 
+
+    @Override
+    public String toString() {
+        return "Price{" +
+                "id=" + id +
+                ", sum=" + sum +
+                ", currency=" + currency +
+                ", type_of_order_of_real_estate=" + type_of_order_of_real_estate +
+                '}';
+    }
 }

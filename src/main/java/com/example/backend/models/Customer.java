@@ -31,16 +31,19 @@ public class Customer {
     private String login;
     private String password;
     private long phone_number;
-    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private String avatar;
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,orphanRemoval = true)
     @JoinTable(name = "user_realtyObject",
             joinColumns = @JoinColumn(name="user_id"),
             inverseJoinColumns = @JoinColumn(name = "user_realty_object_id"))
-    private List<Realty_Object> my_realty_objectList=new ArrayList<>();
+    private List<Realty_Object> my_realty_objectList;
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JoinTable(name="user_added_to_favorite",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "added_to_favorite_id"))
     private List<Realty_Object> added_to_favorites=new ArrayList<>();
+
+
 
     @Override
     public String toString() {

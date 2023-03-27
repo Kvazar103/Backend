@@ -98,6 +98,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                  .antMatchers(HttpMethod.DELETE,"/deleteAll").permitAll()
                  .antMatchers(HttpMethod.GET,"/getAllCustomers").permitAll()
                  .antMatchers(HttpMethod.POST,"/login").permitAll()
+                 .antMatchers(HttpMethod.GET,"/get12RandomRealtyObject").permitAll()
+                 .antMatchers(HttpMethod.PATCH,"/customer/{id}/realtyObject/{x}").permitAll()
                  .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)//щоб не зберігалася сесія
         // бо якщо буде зберігатися сесія сервак буде кешувати токен(він може мати закешований і все одно пустить якщо буде заборонено)
                  .and().cors().configurationSource(corsConfigurationSource()) //за замовчуванням дозволено зробити запит до ендпоїнтів тільки з одного сервака(запит з localhost:8080 тільки на localhost:8080)/тому ми додали додаткові
