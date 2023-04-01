@@ -6,6 +6,7 @@ import lombok.*;
 
 
 import javax.persistence.*;
+import javax.swing.*;
 import java.util.*;
 
 
@@ -25,6 +26,8 @@ public class Realty_Object {
     private String apt_suite_building;
     private int rooms;
     private int square;
+    private String details;
+
 
     private final Date creationDate = new Date();
     private String DateOfCreation;

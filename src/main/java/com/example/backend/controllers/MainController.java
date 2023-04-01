@@ -162,6 +162,8 @@ public void addObject(@PathVariable int id,@RequestParam("body") String realty_o
         newRealtyObject.setReal_estate(object.getReal_estate());
         newRealtyObject.setPrice(object.getPrice());
         newRealtyObject.setDateOfCreation(formater.format(object.getCreationDate()));
+        newRealtyObject.setDetails(object.getDetails());
+//        newRealtyObject.setDetailsTWO(object.getDetailsTWO());
 //        newRealtyObject.setImages("/images/"+images.getOriginalFilename());
 
         String home = System.getProperty("user.home");
