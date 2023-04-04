@@ -16,6 +16,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 //import org.springframework.context.annotation.Bean;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,13 +27,18 @@ import org.springframework.http.HttpStatus;
 //import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -63,6 +69,7 @@ public class MainController {
 //        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
 //        customerDAO.save(customer);
 //    }
+
 
     @PostMapping("/save")
     public void save(@RequestParam("customer") String customer,@RequestParam MultipartFile avatar) {
@@ -107,6 +114,245 @@ public class MainController {
         }
 //       customerDAO.save(customer);
     }
+    @PatchMapping("/{id}/updateProfile")
+    public void updateProfile(@PathVariable int id,@RequestParam("customer") String customer,@RequestParam(required = false) MultipartFile avatar,@RequestParam(required = false) String message) throws IOException{
+
+        ObjectMapper mapper=new ObjectMapper();
+        Customer customerToUpdate= customerDAO.findCustomerById(id);
+        System.out.println(customerToUpdate);
+
+        if(message!=null && message.equals("Deleted")){
+            System.out.println("deleeee");
+            String home = System.getProperty("user.home");
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                    File.separator+"backend"+File.separator+"images"+File.separator;
+            String directoryOldName = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
+            try {
+                FileUtils.deleteDirectory(new File(directoryOldName));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            try {
+                Customer object = mapper.readValue(customer, Customer.class);
+
+                customerToUpdate.setName(object.getName());
+                customerToUpdate.setSurname(object.getSurname());
+                customerToUpdate.setEmail(object.getEmail());
+                customerToUpdate.setLogin(object.getLogin());
+                customerToUpdate.setPhone_number(object.getPhone_number());
+                System.out.println("dfssdfsd");
+                System.out.println(customerToUpdate);
+                System.out.println(message);
+//                System.out.println(avatar);
+
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            customerToUpdate.setAvatar(null);
+            customerDAO.save(customerToUpdate);
+        }else if(message!=null && message.equals("NotChanged")){
+            System.out.println("No change");
+
+            String home = System.getProperty("user.home");
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                    File.separator+"backend"+File.separator+"images"+File.separator;
+            String directoryOldName = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
+
+            String directoryOldNameFile = home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                    File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator;
+
+
+            File oldDir=new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                    File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
+
+            Path oldSource=Paths.get(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                    File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
+
+            try {
+                Customer object = mapper.readValue(customer, Customer.class);
+
+                customerToUpdate.setName(object.getName());
+                customerToUpdate.setSurname(object.getSurname());
+                customerToUpdate.setEmail(object.getEmail());
+                customerToUpdate.setLogin(object.getLogin());
+                customerToUpdate.setPhone_number(object.getPhone_number());
+                System.out.println("dfssdfsd");
+                System.out.println(customerToUpdate);
+//                System.out.println(message);
+//                System.out.println(avatar);
+
+                String newDirectory = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
+                String directoryOldNewFile = home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                        File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator;
+
+                File newDir=new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                        File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator+customerToUpdate.getAvatar());
+
+                Path newSource=Paths.get(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                        File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
+                Files.move(oldSource,newSource);
+                customerDAO.save(customerToUpdate);
+
+                    File fileList =oldDir.getCanonicalFile();
+                    System.out.println(fileList);
+
+                        boolean b = oldDir.renameTo(newDir);
+                    System.out.println(b);
+
+                System.out.println("abs");
+
+            } catch (IOException ignored) {
+
+            }
+//            customerDAO.save(customerToUpdate);
+        }else if(avatar == null){
+            System.out.println("avatar empty");
+
+            String home = System.getProperty("user.home");
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                    File.separator+"backend"+File.separator+"images"+File.separator;
+            String directoryOldName = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
+
+            try {
+                Customer object = mapper.readValue(customer, Customer.class);
+
+                customerToUpdate.setName(object.getName());
+                customerToUpdate.setSurname(object.getSurname());
+                customerToUpdate.setEmail(object.getEmail());
+                customerToUpdate.setLogin(object.getLogin());
+                customerToUpdate.setPhone_number(object.getPhone_number());
+                System.out.println("dfssdfsd");
+                System.out.println(customerToUpdate);
+                System.out.println(message);
+//                System.out.println(avatar);
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String newDirectory = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
+            System.out.println(directoryOldName);
+            System.out.println(newDirectory);
+
+            try {
+                FileUtils.deleteDirectory(new File(directoryOldName));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            File nDirectory=new File(newDirectory);
+//            File directory = new File(directoryOldName);
+
+            if (! nDirectory.exists()){
+                nDirectory.mkdir();
+                // If you require it to make the entire directory path including parents,
+                // use directory.mkdirs(); here instead.
+            }
+        }
+        if(avatar!=null){
+            customerToUpdate.setAvatar(null);
+            String home = System.getProperty("user.home");
+
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                    File.separator+"backend"+File.separator+"images"+File.separator;
+            String directoryOldName = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
+            try {
+                Customer object = mapper.readValue(customer, Customer.class);
+
+                customerToUpdate.setName(object.getName());
+                customerToUpdate.setSurname(object.getSurname());
+                customerToUpdate.setEmail(object.getEmail());
+                customerToUpdate.setLogin(object.getLogin());
+                customerToUpdate.setPhone_number(object.getPhone_number());
+                System.out.println("dfssdfsd");
+                System.out.println(customerToUpdate);
+                System.out.println(message);
+                System.out.println(avatar);
+
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String newDirectory = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
+            System.out.println(directoryOldName);
+            System.out.println(newDirectory);
+
+
+            try {
+                FileUtils.deleteDirectory(new File(directoryOldName));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            File nDirectory=new File(newDirectory);
+//            File directory = new File(directoryOldName);
+
+            if (! nDirectory.exists()){
+                nDirectory.mkdir();
+                // If you require it to make the entire directory path including parents,
+                // use directory.mkdirs(); here instead.
+            }
+
+//            if(directory.renameTo(new File(newDirectory))){
+//                System.out.println(directory);
+//            }
+
+            System.out.println(customerToUpdate);
+            try {
+                avatar.transferTo(new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                        File.separator+"backend"+File.separator+"images"+File.separator+nDirectory.getName()+File.separator+avatar.getOriginalFilename()));
+                customerToUpdate.setAvatar(avatar.getOriginalFilename());
+                customerDAO.save(customerToUpdate);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+    }
+    @PatchMapping("/update/customer/{id}/addedToFavoriteList")
+    public void updateCustomerAddedToFavorite(@PathVariable int id,@RequestParam("realtyObject") String realty_object){
+      Customer customerToUpdate =  customerDAO.findCustomerById(id);
+//      System.out.println(customerToUpdate);
+//      System.out.println(realty_object);
+
+        ObjectMapper mapper=new ObjectMapper();
+
+        try {
+            Realty_Object object=mapper.readValue(realty_object,Realty_Object.class);
+            System.out.println(object);
+            Realty_Object obj=new Realty_Object()
+          List<Realty_Object> customerFavoriteList =  customerToUpdate.getAdded_to_favorites();
+          customerFavoriteList.add(object);
+          System.out.println(customerFavoriteList);
+          System.out.println(customerToUpdate);
+          customerDAO.save(customerToUpdate);
+
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CustomerDTO customerDTO){  //метод логін для того що віддав нам токен
         if(!customerDAO.existsCustomerByLogin(customerDTO.getLogin())){
@@ -139,7 +385,6 @@ public class MainController {
 //    }
 
 
-//    @RequestPart("body") RealtyObjectDTO realtyObjectDTO,@RequestPart("images") MultipartFile images
 @PostMapping("/{id}/addObject")
 public void addObject(@PathVariable int id,@RequestParam("body") String realty_object, @RequestParam MultipartFile[] images) {
 
@@ -172,7 +417,8 @@ public void addObject(@PathVariable int id,@RequestParam("body") String realty_o
                 File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
                 File.separator+"java"+File.separator+"com"+File.separator+"example"+
                 File.separator+"backend"+File.separator+"images"+File.separator;
-        String directoryName = path.concat(customer.getName()+customer.getSurname());
+//        String directoryName = path.concat(customer.getName()+customer.getSurname());
+        String directoryName = path.concat(customer.getId()+"id");
 //        String fileName = id + getTimeStamp() + ".txt";
 
         File directory = new File(directoryName);
@@ -250,6 +496,8 @@ public void addObject(@PathVariable int id,@RequestParam("body") String realty_o
         }
         return new ResponseEntity<>(customer,HttpStatus.OK);
     }
+
+
 
 
 }

@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Customer {
+public class Customer{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -43,6 +43,9 @@ public class Customer {
             inverseJoinColumns = @JoinColumn(name = "added_to_favorite_id"))
     private List<Realty_Object> added_to_favorites=new ArrayList<>();
 
+    public Customer(String name, String surname) {
+
+    }
 
 
     @Override
@@ -59,4 +62,5 @@ public class Customer {
                 ", added_to_favorites=" + added_to_favorites +
                 '}';
     }
+
 }
