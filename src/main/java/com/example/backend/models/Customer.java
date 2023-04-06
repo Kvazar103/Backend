@@ -37,11 +37,17 @@ public class Customer{
             joinColumns = @JoinColumn(name="user_id"),
             inverseJoinColumns = @JoinColumn(name = "user_realty_object_id"))
     private List<Realty_Object> my_realty_objectList;
-    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    @JoinTable(name="user_added_to_favorite",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "added_to_favorite_id"))
-    private List<Realty_Object> added_to_favorites=new ArrayList<>();
+//    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+//    @JoinTable(name="user_added_to_favorite",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "added_to_favorite_id"))
+//    private List<Realty_Object> added_to_favorites=new ArrayList<>();
+//     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+//     @JoinTable(name="user_added_to_favorite",
+//              joinColumns = @JoinColumn(name = "user_id"),
+//              inverseJoinColumns = @JoinColumn(name = "added_to_favorite_id"))
+    @ElementCollection
+    private List<Integer> added_to_favorites=new ArrayList<>();
 
     public Customer(String name, String surname) {
 

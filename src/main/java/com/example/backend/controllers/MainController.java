@@ -21,6 +21,7 @@ import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
@@ -51,25 +52,41 @@ public class MainController {
     private CustomerDAO customerDAO;
     private RealtyObjectDAO realtyObjectDAO;
     private PasswordEncoder passwordEncoder;
+    BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+//    boolean isPasswordMatches = bcrypt.matches(userenteredpasswordWithotEncryoted, encryptedPasswordFromDb);
 
     private AuthenticationManager authenticationManager;//базовий об'єкт який займається процесом аутентифікації
 
 
-    @PostMapping("/addUser")
-    Customer newCustomer(@RequestBody Customer newCustomer){
-        return customerDAO.save(newCustomer);
-    }
-
-    @GetMapping("/")
-    public String open(){
-        return "open";
-    }
-//    @PostMapping("/save")
-//    public void save(@RequestBody Customer customer){
-//        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-//        customerDAO.save(customer);
+//    @PatchMapping("/{id}/changePassword")
+//    public void changePassword(@PathVariable int id,@RequestBody String customerPassword){
+//        Customer customerToChangePassword=customerDAO.findCustomerById(id);
+//        System.out.println(customerPassword);
+//        boolean isPasswordMatches = bcrypt.matches(customerPassword, customerToChangePassword.getPassword());
+//        if(isPasswordMatches){
+//            System.out.println("passwords matches");
+//        }else {
+//            System.out.println("wrong");
+//        }
 //    }
-
+    @PatchMapping("/{id}/checkPassword")
+    public ResponseEntity<String> checkIsPasswordMatches(@PathVariable int id,@RequestParam("old_password") String customerPassword,@RequestParam("new_password") String newPassword){
+        Customer customerToCheckPassword=customerDAO.findCustomerById(id);
+        System.out.println(customerPassword);
+        System.out.println("customer password");
+        System.out.println(newPassword);
+        System.out.println("new password");
+        boolean isPasswordMatches = bcrypt.matches(customerPassword, customerToCheckPassword.getPassword());
+        if(isPasswordMatches){
+            System.out.println("passwords matches");
+            customerToCheckPassword.setPassword(passwordEncoder.encode(newPassword));
+            customerDAO.save(customerToCheckPassword);
+            return new ResponseEntity<>("Password true",HttpStatus.OK);
+        }else {
+            System.out.println("wrong");
+            return new ResponseEntity<>("Password false",HttpStatus.FORBIDDEN);
+        }
+    }
 
     @PostMapping("/save")
     public void save(@RequestParam("customer") String customer,@RequestParam MultipartFile avatar) {
@@ -342,15 +359,36 @@ public class MainController {
         try {
             Realty_Object object=mapper.readValue(realty_object,Realty_Object.class);
             System.out.println(object);
-            Realty_Object obj=new Realty_Object()
-          List<Realty_Object> customerFavoriteList =  customerToUpdate.getAdded_to_favorites();
-          customerFavoriteList.add(object);
+//            Realty_Object obj=new Realty_Object()
+          List<Integer> customerFavoriteList =  customerToUpdate.getAdded_to_favorites();
+          customerFavoriteList.add(object.getId());
           System.out.println(customerFavoriteList);
           System.out.println(customerToUpdate);
           customerDAO.save(customerToUpdate);
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
+        }
+    }
+    @PatchMapping("/delete/customer/{id}/addedToFavoriteRealtyObject/{x}")
+    public void deleteRealtyObjectAddedToFavorite(@PathVariable int id,@PathVariable int x){
+        Customer customer=customerDAO.findCustomerById(id);
+        System.out.println(customer);
+        List<Integer> addedToFavorite=customer.getAdded_to_favorites();
+//        for (Integer el:addedToFavorite){
+//            if(el == x){
+//                System.out.println(el);
+//                addedToFavorite.remove(el);
+//                customer.setAdded_to_favorites(addedToFavorite);
+//                customerDAO.save(customer);
+//            }
+//        }
+        for (int i=0;i<addedToFavorite.size();i++){
+            if(addedToFavorite.get(i).equals(x)){
+                addedToFavorite.remove(addedToFavorite.get(i));
+                customer.setAdded_to_favorites(addedToFavorite);
+                customerDAO.save(customer);
+            }
         }
     }
     @PostMapping("/login")
@@ -468,6 +506,10 @@ public void addObject(@PathVariable int id,@RequestParam("body") String realty_o
     @GetMapping("/getAllCustomers")
     public ResponseEntity<List<Customer>> getCustomers(){
         return new ResponseEntity<>(customerDAO.findAll(), HttpStatus.OK);
+    }
+    @GetMapping("/getAllRealtyObjects")
+    public ResponseEntity<List<Realty_Object>> getAllRealtyObjects(){
+        return new ResponseEntity<>(realtyObjectDAO.findAll(),HttpStatus.OK);
     }
     @GetMapping("/get12RandomRealtyObject")
     public ResponseEntity<List<Realty_Object>> getRealtyObjects(){
