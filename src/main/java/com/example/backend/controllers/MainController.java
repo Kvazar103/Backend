@@ -489,9 +489,32 @@ public void addObject(@PathVariable int id,@RequestParam("body") String realty_o
 
 }
 
+    @GetMapping("/customer/favorites/{id}")
+    public ResponseEntity<List<Map<Integer,Realty_Object>>> getAddedToFavoriteObjects(@PathVariable int id){
+        Customer customer=customerDAO.findCustomerById(id);
+        List<Integer> customerAddedToFavoriteObjectsList=customer.getAdded_to_favorites();
+        List<Map<Integer,Realty_Object>> customerIdAndRealtyObject=new ArrayList<>();
+        for(Integer numOfRealty:customerAddedToFavoriteObjectsList){
+            Realty_Object realty_object=realtyObjectDAO.findRealty_ObjectById(numOfRealty);
+            List<Customer> allCustomers=customerDAO.findAll();
+            for (Customer customer1:allCustomers){
+                List<Realty_Object> customer1RealtyObjectList=customer1.getMy_realty_objectList();
+                for (Realty_Object realty:customer1RealtyObjectList){
+                    if(realty == realty_object){
+                        System.out.println(realty);
+                        System.out.println(customer1);
+                        Map<Integer,Realty_Object> idRealty=new HashMap<>();
+                        idRealty.put(customer1.getId(),realty);
+                        customerIdAndRealtyObject.add(idRealty);
+                    }
+                }
+            }
+        }
+        return new ResponseEntity<>(customerIdAndRealtyObject,HttpStatus.OK);
+    }
     @GetMapping("/object/{id}")
     public ResponseEntity<Realty_Object> getObject(@PathVariable int id){
-       Realty_Object realty_object= realtyObjectDAO.findRealty_ObjectById(id);
+        Realty_Object realty_object= realtyObjectDAO.findRealty_ObjectById(id);
         return new ResponseEntity<>(realty_object,HttpStatus.OK);
     }
     @GetMapping("/customer/{id}")

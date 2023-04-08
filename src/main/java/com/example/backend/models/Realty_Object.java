@@ -79,4 +79,22 @@ public class Realty_Object {
 //    (cascade = CascadeType.ALL,fetch = FetchType.LAZY) //many to one uni directional(багато нерухомості до одного юзера)
 
 
+    @Override
+    public String toString() {
+        return "Realty_Object{" +
+                "id=" + id +
+                ", city='" + city + '\'' +
+                ", district=" + district +
+                ", address='" + address + '\'' +
+                ", apt_suite_building='" + apt_suite_building + '\'' +
+                ", rooms=" + rooms +
+                ", square=" + square +
+                ", details='" + details + '\'' +
+                ", creationDate=" + creationDate +
+                ", DateOfCreation='" + DateOfCreation + '\'' +
+                ", images=" + images +
+                ", real_estate=" + real_estate +
+                ", price=" + price +
+                '}';
+    }
 }
