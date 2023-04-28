@@ -5,11 +5,8 @@ import com.example.backend.dao.CustomerDAO;
 import com.example.backend.dao.RealtyObjectDAO;
 import com.example.backend.models.Customer;
 //import com.example.backend.services.CustomerService;
-import com.example.backend.models.Price;
-import com.example.backend.models.Real_Estate;
 import com.example.backend.models.Realty_Object;
 import com.example.backend.models.dto.CustomerDTO;
-import com.example.backend.models.dto.RealtyObjectDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -17,25 +14,20 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 //import org.springframework.context.annotation.Bean;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 //import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,18 +49,6 @@ public class MainController {
 
     private AuthenticationManager authenticationManager;//базовий об'єкт який займається процесом аутентифікації
 
-
-//    @PatchMapping("/{id}/changePassword")
-//    public void changePassword(@PathVariable int id,@RequestBody String customerPassword){
-//        Customer customerToChangePassword=customerDAO.findCustomerById(id);
-//        System.out.println(customerPassword);
-//        boolean isPasswordMatches = bcrypt.matches(customerPassword, customerToChangePassword.getPassword());
-//        if(isPasswordMatches){
-//            System.out.println("passwords matches");
-//        }else {
-//            System.out.println("wrong");
-//        }
-//    }
     @PatchMapping("/{id}/checkPassword")
     public ResponseEntity<String> checkIsPasswordMatches(@PathVariable int id,@RequestParam("old_password") String customerPassword,@RequestParam("new_password") String newPassword){
         Customer customerToCheckPassword=customerDAO.findCustomerById(id);
@@ -131,6 +111,175 @@ public class MainController {
         }
 //       customerDAO.save(customer);
     }
+    @PatchMapping("/{id}/{userId}/updateRealtyObject")
+    public void updateRealtyObject(@PathVariable int id,@PathVariable int userId,@RequestParam("realty_object") String realtyObject,@RequestParam(value = "images_to_add",required = false) MultipartFile[] imagesToAdd,@RequestParam(value = "currentImages_to_delete",required = false) String[] imagesToDelete) throws IOException {
+        System.out.println("controller start");
+        System.out.println(realtyObject);
+        System.out.println(id);
+        System.out.println(userId);
+        System.out.println(Arrays.toString(imagesToAdd));
+        System.out.println(Arrays.toString(imagesToDelete));
+        System.out.println("controller end");
+
+        Realty_Object realty_objectToUpdate=realtyObjectDAO.findRealty_ObjectById(id);
+        System.out.println(realty_objectToUpdate);
+
+        SimpleDateFormat formater = new SimpleDateFormat("dd.MM.yyyy");
+
+        ObjectMapper mapper=new ObjectMapper();
+        if(imagesToAdd == null && imagesToDelete==null){
+            try {
+                Realty_Object object=mapper.readValue(realtyObject,Realty_Object.class);
+                System.out.println("no images");
+                realty_objectToUpdate.setDistrict(object.getDistrict());
+                realty_objectToUpdate.setAddress(object.getAddress());
+                realty_objectToUpdate.setApt_suite_building(object.getApt_suite_building());
+                realty_objectToUpdate.setRooms(object.getRooms());
+                realty_objectToUpdate.setSquare(object.getSquare());
+                realty_objectToUpdate.setDetails(object.getDetails());
+                realty_objectToUpdate.setReal_estate(object.getReal_estate());
+//                realty_objectToUpdate.setPrice(object.getPrice());
+                realty_objectToUpdate.setDateOfUpdate(formater.format(object.getUpdateDate()));
+
+                realty_objectToUpdate.getPrice().setCurrency(object.getPrice().getCurrency());
+                realty_objectToUpdate.getPrice().setSum(object.getPrice().getSum());
+                realty_objectToUpdate.getPrice().setType_of_order_of_real_estate(object.getPrice().getType_of_order_of_real_estate());
+
+                System.out.println(realty_objectToUpdate);
+                realtyObjectDAO.save(realty_objectToUpdate);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (imagesToAdd!=null && imagesToDelete!=null) {
+            System.out.println("New images and some current images need to delete");
+        } else if (imagesToAdd==null && imagesToDelete!=null) {
+            System.out.println("There are no new images but need to delete current images");
+
+            String home = System.getProperty("user.home");
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                    File.separator+"backend"+File.separator;
+            System.out.println(Arrays.toString(imagesToDelete));
+//            String imagesToDeletePathArray = Arrays.toString(imagesToDelete);
+            List<String> imagesToDeletePathArray = new ArrayList<>(List.of(imagesToDelete));
+            System.out.println(imagesToDeletePathArray);
+            List<String> imagesNames=new ArrayList<>();
+            for (String pat: imagesToDeletePathArray){
+                System.out.println(Arrays.toString(pat.split("/", 6)));
+                List<String> splittedPath= List.of(pat.split("/", 6));
+                System.out.println(splittedPath);
+                System.out.println(splittedPath.get(splittedPath.size()-1));
+                imagesNames.add(splittedPath.get(splittedPath.size()-1));
+                System.out.println("cycle");
+                System.out.println(imagesNames);
+            }
+
+            try {
+                Realty_Object object=mapper.readValue(realtyObject,Realty_Object.class);
+                realty_objectToUpdate.setDistrict(object.getDistrict());
+                realty_objectToUpdate.setAddress(object.getAddress());
+                realty_objectToUpdate.setApt_suite_building(object.getApt_suite_building());
+                realty_objectToUpdate.setRooms(object.getRooms());
+                realty_objectToUpdate.setSquare(object.getSquare());
+                realty_objectToUpdate.setDetails(object.getDetails());
+                realty_objectToUpdate.setReal_estate(object.getReal_estate());
+//                realty_objectToUpdate.setPrice(object.getPrice());
+                realty_objectToUpdate.setDateOfUpdate(formater.format(object.getUpdateDate()));
+
+                realty_objectToUpdate.getPrice().setCurrency(object.getPrice().getCurrency());
+                realty_objectToUpdate.getPrice().setSum(object.getPrice().getSum());
+                realty_objectToUpdate.getPrice().setType_of_order_of_real_estate(object.getPrice().getType_of_order_of_real_estate());
+
+                List<String> imagesInRealty = new ArrayList<>(realty_objectToUpdate.getImages());
+                System.out.println(imagesInRealty);
+                System.out.println(imagesNames);
+
+                for(int i=0;i<imagesNames.size();i++){
+                    for (int t=0;t<imagesInRealty.size();t++){
+                        if(Objects.equals(imagesNames.get(i), imagesInRealty.get(t))){
+                            System.out.println(imagesNames.get(i));
+                            System.out.println("provirka");
+                            System.out.println(imagesInRealty.get(t));
+                            System.out.println("_____");
+                            imagesInRealty.remove(imagesInRealty.get(t));
+                        }
+                    }
+                }
+                realty_objectToUpdate.setImages(imagesInRealty);
+
+                System.out.println(imagesInRealty);
+
+                System.out.println(realty_objectToUpdate);
+                realtyObjectDAO.save(realty_objectToUpdate);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+            for(int i=0;i<imagesToDelete.length;i++){
+                String pathToFileToDlt=imagesToDelete[i];
+                System.out.println(pathToFileToDlt);
+                List<String> aOfStro= List.of(pathToFileToDlt.split("/", 4));
+                System.out.println(aOfStro);
+                String spPthToFile=aOfStro.get(aOfStro.size()-1);
+                System.out.println(spPthToFile);
+                String fileDirectoryName = path.concat(spPthToFile);
+                try {
+                    Files.delete(Path.of(fileDirectoryName));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+        } else if (imagesToAdd!=null && imagesToDelete==null) {
+            System.out.println("New images but current images doesnt need to delete");
+
+            try {
+                Realty_Object object=mapper.readValue(realtyObject,Realty_Object.class);
+                System.out.println("new images");
+                realty_objectToUpdate.setDistrict(object.getDistrict());
+                realty_objectToUpdate.setAddress(object.getAddress());
+                realty_objectToUpdate.setApt_suite_building(object.getApt_suite_building());
+                realty_objectToUpdate.setRooms(object.getRooms());
+                realty_objectToUpdate.setSquare(object.getSquare());
+                realty_objectToUpdate.setDetails(object.getDetails());
+                realty_objectToUpdate.setReal_estate(object.getReal_estate());
+//                realty_objectToUpdate.setPrice(object.getPrice());
+                realty_objectToUpdate.setDateOfUpdate(formater.format(object.getUpdateDate()));
+
+                realty_objectToUpdate.getPrice().setCurrency(object.getPrice().getCurrency());
+                realty_objectToUpdate.getPrice().setSum(object.getPrice().getSum());
+                realty_objectToUpdate.getPrice().setType_of_order_of_real_estate(object.getPrice().getType_of_order_of_real_estate());
+
+                String uId=userId+"id";
+                System.out.println(uId);
+                String home = System.getProperty("user.home");
+                String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
+                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
+                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
+                        File.separator+"backend"+File.separator+"images"+File.separator+uId+File.separator;
+                System.out.println(Arrays.toString(imagesToAdd));
+
+                List<String> currentRealtyImages=realty_objectToUpdate.getImages();
+                Arrays.asList(imagesToAdd).stream().forEach(multipartFile -> {
+                    try {
+                        multipartFile.transferTo(new File(path+multipartFile.getOriginalFilename()));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    currentRealtyImages.add(multipartFile.getOriginalFilename());
+                    System.out.println(currentRealtyImages);
+                });
+
+                System.out.println(realty_objectToUpdate);
+                realtyObjectDAO.save(realty_objectToUpdate);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+    }
     @PatchMapping("/{id}/updateProfile")
     public void updateProfile(@PathVariable int id,@RequestParam("customer") String customer,@RequestParam(required = false) MultipartFile avatar,@RequestParam(required = false) String message) throws IOException{
 
@@ -179,13 +328,6 @@ public class MainController {
                     File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
                     File.separator+"java"+File.separator+"com"+File.separator+"example"+
                     File.separator+"backend"+File.separator+"images"+File.separator;
-            String directoryOldName = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
-
-            String directoryOldNameFile = home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator;
-
 
             File oldDir=new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
                     File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
@@ -210,11 +352,7 @@ public class MainController {
 //                System.out.println(message);
 //                System.out.println(avatar);
 
-                String newDirectory = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
-                String directoryOldNewFile = home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                        File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator;
+
 
                 File newDir=new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
                         File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
@@ -239,7 +377,7 @@ public class MainController {
             } catch (IOException ignored) {
 
             }
-//            customerDAO.save(customerToUpdate);
+
         }else if(avatar == null){
             System.out.println("avatar empty");
 

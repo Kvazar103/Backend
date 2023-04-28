@@ -32,6 +32,9 @@ public class Realty_Object {
     private final Date creationDate = new Date();
     private String DateOfCreation;
 
+    private Date updateDate=new Date();
+    private String dateOfUpdate;
+
 
     @ElementCollection
     private List<String> images=new ArrayList<>();
@@ -41,6 +44,7 @@ public class Realty_Object {
     @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER) ////cascadetype.all при видалені realty_object видаляється і price
     @JoinColumn(name="price_id",referencedColumnName = "id")
     private Price price;
+
 
 
     public String getDateOfCreation() {
@@ -55,25 +59,14 @@ public class Realty_Object {
         return creationDate;
     }
 
-    public Realty_Object(String address, String apt_suite_building, int rooms, int square, String s, String s1, Real_Estate real_estate, Price price) {
+    public Date getUpdateDate() {
+        return updateDate;
     }
 
-    public Realty_Object(String address, String apt_suite_building, int rooms, int square, String s, Real_Estate real_estate, Price price) {
-
+    public void setDateOfUpdate(String dateOfUpdate) {
+        this.dateOfUpdate = dateOfUpdate;
     }
-
-    public Realty_Object(String address, String apt_suite_building, int rooms, int square, Real_Estate real_estate, Price price) {
-
-    }
-
-    public Realty_Object(String address, String apt_suite_building, int rooms, int square, Real_Estate real_estate, Price price, String s) {
-
-    }
-
-    public Realty_Object(String address) {
-
-    }
-//    @ManyToOne
+    //    @ManyToOne
 //    private Customer customer;
     //    @JoinColumn(name="realty_object_owner",referencedColumnName = "id")
 //    (cascade = CascadeType.ALL,fetch = FetchType.LAZY) //many to one uni directional(багато нерухомості до одного юзера)
