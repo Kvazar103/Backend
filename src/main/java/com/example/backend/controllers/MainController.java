@@ -5,10 +5,10 @@ import com.example.backend.dao.CustomerDAO;
 import com.example.backend.dao.RealtyObjectDAO;
 import com.example.backend.models.Customer;
 //import com.example.backend.services.CustomerService;
-import com.example.backend.models.Real_Estate;
 import com.example.backend.models.Realty_Object;
-import com.example.backend.models.Type_Of_Order_Of_Real_Estate;
 import com.example.backend.models.dto.CustomerDTO;
+import com.example.backend.services.CustomerService;
+import com.example.backend.services.RealtyObjectService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -37,7 +37,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
 
 
 @RestController
@@ -45,6 +44,8 @@ import java.util.regex.Pattern;
 @CrossOrigin("http://localhost:3000")
 public class MainController {
     private CustomerDAO customerDAO;
+    private CustomerService customerService;
+    private RealtyObjectService realtyObjectService;
     private RealtyObjectDAO realtyObjectDAO;
     private PasswordEncoder passwordEncoder;
     BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
@@ -54,21 +55,7 @@ public class MainController {
 
     @PatchMapping("/{id}/checkPassword")
     public ResponseEntity<String> checkIsPasswordMatches(@PathVariable int id,@RequestParam("old_password") String customerPassword,@RequestParam("new_password") String newPassword){
-        Customer customerToCheckPassword=customerDAO.findCustomerById(id);
-        System.out.println(customerPassword);
-        System.out.println("customer password");
-        System.out.println(newPassword);
-        System.out.println("new password");
-        boolean isPasswordMatches = bcrypt.matches(customerPassword, customerToCheckPassword.getPassword());
-        if(isPasswordMatches){
-            System.out.println("passwords matches");
-            customerToCheckPassword.setPassword(passwordEncoder.encode(newPassword));
-            customerDAO.save(customerToCheckPassword);
-            return new ResponseEntity<>("Password true",HttpStatus.OK);
-        }else {
-            System.out.println("wrong");
-            return new ResponseEntity<>("Password false",HttpStatus.FORBIDDEN);
-        }
+        return customerService.ifPasswordMatchesSave(id,customerPassword,newPassword);
     }
 
     @PostMapping("/save")
@@ -90,10 +77,8 @@ public class MainController {
 
             String home = System.getProperty("user.home");
 
-            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator+"images"+File.separator;
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator+"images"+File.separator;
             String directoryName = path.concat(newCustomer.getName()+newCustomer.getSurname()+"_avatar");
 
             File directory = new File(directoryName);
@@ -102,10 +87,8 @@ public class MainController {
                 // If you require it to make the entire directory path including parents,
                 // use directory.mkdirs(); here instead.
             }
-            avatar.transferTo(new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator+"images"+File.separator+directory.getName()+File.separator+avatar.getOriginalFilename()));
+            avatar.transferTo(new File(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator+"images"+File.separator+directory.getName()+File.separator+avatar.getOriginalFilename()));
 
             newCustomer.setAvatar(avatar.getOriginalFilename());
             customerDAO.save(newCustomer);
@@ -175,10 +158,8 @@ public class MainController {
                 String uId=userId+"id";
                 System.out.println(uId);
                 String home = System.getProperty("user.home");
-                String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                        File.separator+"backend"+File.separator+"images"+File.separator+uId+File.separator;
+                String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                        File.separator+"images"+File.separator+uId+File.separator;
                 System.out.println(Arrays.toString(imagesToAdd));
 
                 List<String> currentRealtyImages=realty_objectToUpdate.getImages();
@@ -198,10 +179,8 @@ public class MainController {
                 throw new RuntimeException(e);
             }
             String home = System.getProperty("user.home");
-            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator;
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator;
             System.out.println(Arrays.toString(imagesToDelete));
 //            String imagesToDeletePathArray = Arrays.toString(imagesToDelete);
             List<String> imagesToDeletePathArray = new ArrayList<>(List.of(imagesToDelete));
@@ -258,10 +237,8 @@ public class MainController {
             System.out.println("There are no new images but need to delete current images");
 
             String home = System.getProperty("user.home");
-            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator;
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator;
             System.out.println(Arrays.toString(imagesToDelete));
 //            String imagesToDeletePathArray = Arrays.toString(imagesToDelete);
             List<String> imagesToDeletePathArray = new ArrayList<>(List.of(imagesToDelete));
@@ -356,10 +333,8 @@ public class MainController {
                 String uId=userId+"id";
                 System.out.println(uId);
                 String home = System.getProperty("user.home");
-                String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                        File.separator+"backend"+File.separator+"images"+File.separator+uId+File.separator;
+                String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                        File.separator+"images"+File.separator+uId+File.separator;
                 System.out.println(Arrays.toString(imagesToAdd));
 
                 List<String> currentRealtyImages=realty_objectToUpdate.getImages();
@@ -392,10 +367,8 @@ public class MainController {
         if(message!=null && message.equals("Deleted")){
             System.out.println("deleeee");
             String home = System.getProperty("user.home");
-            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator+"images"+File.separator;
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator+"images"+File.separator;
             String directoryOldName = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
             try {
                 FileUtils.deleteDirectory(new File(directoryOldName));
@@ -426,20 +399,14 @@ public class MainController {
             System.out.println("No change");
 
             String home = System.getProperty("user.home");
-            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator+"images"+File.separator;
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator+"images"+File.separator;
 
-            File oldDir=new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
+            File oldDir=new File(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
 
-            Path oldSource=Paths.get(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
+            Path oldSource=Paths.get(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
 
             try {
                 Customer object = mapper.readValue(customer, Customer.class);
@@ -454,17 +421,11 @@ public class MainController {
 //                System.out.println(message);
 //                System.out.println(avatar);
 
+                File newDir=new File(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                        File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator+customerToUpdate.getAvatar());
 
-
-                File newDir=new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                        File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator+customerToUpdate.getAvatar());
-
-                Path newSource=Paths.get(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                        File.separator+"backend"+File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
+                Path newSource=Paths.get(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                        File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
                 Files.move(oldSource,newSource);
                 customerDAO.save(customerToUpdate);
 
@@ -484,10 +445,8 @@ public class MainController {
             System.out.println("avatar empty");
 
             String home = System.getProperty("user.home");
-            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator+"images"+File.separator;
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator+"images"+File.separator;
             String directoryOldName = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
 
             try {
@@ -528,10 +487,8 @@ public class MainController {
             customerToUpdate.setAvatar(null);
             String home = System.getProperty("user.home");
 
-            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                    File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                    File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                    File.separator+"backend"+File.separator+"images"+File.separator;
+            String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator+"images"+File.separator;
             String directoryOldName = path.concat(customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar");
             try {
                 Customer object = mapper.readValue(customer, Customer.class);
@@ -575,10 +532,8 @@ public class MainController {
 
             System.out.println(customerToUpdate);
             try {
-                avatar.transferTo(new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                        File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                        File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                        File.separator+"backend"+File.separator+"images"+File.separator+nDirectory.getName()+File.separator+avatar.getOriginalFilename()));
+                avatar.transferTo(new File(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                        File.separator+"images"+File.separator+nDirectory.getName()+File.separator+avatar.getOriginalFilename()));
                 customerToUpdate.setAvatar(avatar.getOriginalFilename());
                 customerDAO.save(customerToUpdate);
             } catch (IOException e) {
@@ -590,46 +545,11 @@ public class MainController {
     }
     @PatchMapping("/update/customer/{id}/addedToFavoriteList")
     public void updateCustomerAddedToFavorite(@PathVariable int id,@RequestParam("realtyObject") String realty_object){
-      Customer customerToUpdate =  customerDAO.findCustomerById(id);
-//      System.out.println(customerToUpdate);
-//      System.out.println(realty_object);
-
-        ObjectMapper mapper=new ObjectMapper();
-
-        try {
-            Realty_Object object=mapper.readValue(realty_object,Realty_Object.class);
-            System.out.println(object);
-//            Realty_Object obj=new Realty_Object()
-          List<Integer> customerFavoriteList =  customerToUpdate.getAdded_to_favorites();
-          customerFavoriteList.add(object.getId());
-          System.out.println(customerFavoriteList);
-          System.out.println(customerToUpdate);
-          customerDAO.save(customerToUpdate);
-
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        customerService.addRealtyObjectToCustomerAddedToFavoriteList(id,realty_object);
     }
     @PatchMapping("/delete/customer/{id}/addedToFavoriteRealtyObject/{x}")
     public void deleteRealtyObjectAddedToFavorite(@PathVariable int id,@PathVariable int x){
-        Customer customer=customerDAO.findCustomerById(id);
-        System.out.println(customer);
-        List<Integer> addedToFavorite=customer.getAdded_to_favorites();
-//        for (Integer el:addedToFavorite){
-//            if(el == x){
-//                System.out.println(el);
-//                addedToFavorite.remove(el);
-//                customer.setAdded_to_favorites(addedToFavorite);
-//                customerDAO.save(customer);
-//            }
-//        }
-        for (int i=0;i<addedToFavorite.size();i++){
-            if(addedToFavorite.get(i).equals(x)){
-                addedToFavorite.remove(addedToFavorite.get(i));
-                customer.setAdded_to_favorites(addedToFavorite);
-                customerDAO.save(customer);
-            }
-        }
+        customerService.deleteRealtyObjectFromCustomerAddedToFavoriteList(id,x);
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CustomerDTO customerDTO){  //метод логін для того що віддав нам токен
@@ -653,15 +573,6 @@ public class MainController {
         }
         return new ResponseEntity<>("zazazazaz",HttpStatus.FORBIDDEN);//якщо провірку не пройшло тоді заборонено
     }
-//    @PostMapping("/{id}/addObject")
-//    public ResponseEntity<?> addObject(@PathVariable int id, @RequestBody Realty_Object realty_object){
-//        Customer customer=customerDAO.findCustomerById(id);
-//       List<Realty_Object> list= customer.getMy_realty_objectList();
-//       list.add(realty_object);
-//        realtyObjectDAO.save(realty_object);
-//        return new ResponseEntity<>(realty_object, HttpStatus.CREATED);
-//    }
-
 
 @PostMapping("/{id}/addObject")
 public void addObject(@PathVariable int id,@RequestParam("body") String realty_object, @RequestParam MultipartFile[] images) {
@@ -691,10 +602,8 @@ public void addObject(@PathVariable int id,@RequestParam("body") String realty_o
 
         String home = System.getProperty("user.home");
 
-       String path= home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                File.separator+"backend"+File.separator+"images"+File.separator;
+       String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+               File.separator+"images"+File.separator;
 //        String directoryName = path.concat(customer.getName()+customer.getSurname());
         String directoryName = path.concat(customer.getId()+"id");
 //        String fileName = id + getTimeStamp() + ".txt";
@@ -709,10 +618,8 @@ public void addObject(@PathVariable int id,@RequestParam("body") String realty_o
         List<String> images1 = newRealtyObject.getImages();
     Arrays.asList(images).stream().forEach(multipartFile -> {
         try {
-            multipartFile.transferTo(new File(home+ File.separator+"Desktop"+File.separator+"real_estate_project"+
-                File.separator+"Backend"+File.separator+"src"+File.separator+"main"+
-                File.separator+"java"+File.separator+"com"+File.separator+"example"+
-                File.separator+"backend"+File.separator+"images"+File.separator+directory.getName()+File.separator+multipartFile.getOriginalFilename()));
+            multipartFile.transferTo(new File(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
+                    File.separator+"images"+File.separator+directory.getName()+File.separator+multipartFile.getOriginalFilename()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -731,66 +638,12 @@ public void addObject(@PathVariable int id,@RequestParam("body") String realty_o
 
     @GetMapping("/customer/favorites/{id}")
     public ResponseEntity<List<Map<Integer,Realty_Object>>> getAddedToFavoriteObjects(@PathVariable int id){
-        Customer customer=customerDAO.findCustomerById(id);
-        List<Integer> customerAddedToFavoriteObjectsList=customer.getAdded_to_favorites();
-        List<Map<Integer,Realty_Object>> customerIdAndRealtyObject=new ArrayList<>();
-        for(Integer numOfRealty:customerAddedToFavoriteObjectsList){
-            Realty_Object realty_object=realtyObjectDAO.findRealty_ObjectById(numOfRealty);
-            List<Customer> allCustomers=customerDAO.findAll();
-            for (Customer customer1:allCustomers){
-                List<Realty_Object> customer1RealtyObjectList=customer1.getMy_realty_objectList();
-                for (Realty_Object realty:customer1RealtyObjectList){
-                    if(realty == realty_object){
-                        System.out.println(realty);
-                        System.out.println(customer1);
-                        Map<Integer,Realty_Object> idRealty=new HashMap<>();
-                        idRealty.put(customer1.getId(),realty);
-                        customerIdAndRealtyObject.add(idRealty);
-                    }
-                }
-            }
-        }
-        return new ResponseEntity<>(customerIdAndRealtyObject,HttpStatus.OK);
+       return customerService.getCurrentUserListOfAddedToFavorite(id);
     }
 
     @PostMapping("/getSelectedRealtyObjects")
     public ResponseEntity<List<Map<Integer,Realty_Object>>> getSelectedRealtyObjects(@RequestParam("selectType") String selected,@RequestParam("inputData") String input){
-        System.out.println("oooo");
-        System.out.println(selected);
-        System.out.println(input);
-        String[] realEstateAndTypeOfRealtyObject=selected.split(":",2);
-        List<String> listRealEstateAndTypeOfRealtyObject=new ArrayList<>(List.of(realEstateAndTypeOfRealtyObject));
-        System.out.println(listRealEstateAndTypeOfRealtyObject.get(0));
-        List<Realty_Object> realty_objectsWithSelectedTypeOfRealEstate=new ArrayList<>(realtyObjectDAO.getRealty_ObjectByReal_estate(Real_Estate.valueOf(listRealEstateAndTypeOfRealtyObject.get(0))));
-        System.out.println(realty_objectsWithSelectedTypeOfRealEstate);
-        System.out.println(realty_objectsWithSelectedTypeOfRealEstate.get(0));
-        List<Map<Integer,Realty_Object>> listOfCustomerIdAndRealtyObject=new ArrayList<>();
-        for(Realty_Object realty_object:realty_objectsWithSelectedTypeOfRealEstate){
-            if(realty_object.getPrice().getType_of_order_of_real_estate() == Type_Of_Order_Of_Real_Estate.valueOf(listRealEstateAndTypeOfRealtyObject.get(1))){
-                System.out.println("bbbb");
-                System.out.println(realty_object);
-                List<Customer> allCustomers=customerDAO.findAll();
-                for (Customer customer:allCustomers){
-                    List<Realty_Object> customerRealtyObjects=customer.getMy_realty_objectList();
-                    for(Realty_Object realty:customerRealtyObjects){
-                        if(realty.getId() == realty_object.getId()){
-//                            if((Objects.equals(realty_object.getAddress(), input))) {
-                            if(Pattern.compile(Pattern.quote(realty_object.getAddress()),Pattern.CASE_INSENSITIVE).matcher(input).find()) {
-                                Map<Integer, Realty_Object> mapOfCustomerIdAndRealtyObject = new HashMap<>();
-                                mapOfCustomerIdAndRealtyObject.put(customer.getId(), realty_object);
-                                listOfCustomerIdAndRealtyObject.add(0,mapOfCustomerIdAndRealtyObject);
-                            }else {
-                                Map<Integer, Realty_Object> mapOfCustomerIdAndRealtyObject = new HashMap<>();
-                                mapOfCustomerIdAndRealtyObject.put(customer.getId(), realty_object);
-                                listOfCustomerIdAndRealtyObject.add(mapOfCustomerIdAndRealtyObject);
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-        return new ResponseEntity<>(listOfCustomerIdAndRealtyObject,HttpStatus.OK);
+        return realtyObjectService.getSelectedRealtyObjects(selected,input);
     }
     @GetMapping("/object/{id}")
     public ResponseEntity<Realty_Object> getObject(@PathVariable int id){
@@ -816,33 +669,11 @@ public void addObject(@PathVariable int id,@RequestParam("body") String realty_o
     }
     @GetMapping("/get12RandomRealtyObject")
     public ResponseEntity<List<Realty_Object>> getRealtyObjects(){
-        List<Realty_Object> list=realtyObjectDAO.findAll();
-        Collections.shuffle(list);
-        int numberOfElements=12;
-
-        List<Realty_Object> newList=list.subList(0,numberOfElements);
-        return new ResponseEntity<>(newList,HttpStatus.OK);
+        return realtyObjectService.get12RandomRealtyObject();
     }
 
     @PatchMapping("/customer/{id}/realtyObject/{x}")
     public ResponseEntity<Customer> deleteRealtyObject(@PathVariable int id,@PathVariable int x){
-        Customer customer=customerDAO.findCustomerById(id);
-        System.out.println(customer);
-        List<Realty_Object> realty_objectList= customer.getMy_realty_objectList();
-        System.out.println(realty_objectList);
-        for (Realty_Object el:realty_objectList) {
-            if(el.getId()==x){
-                System.out.println(el);
-                realty_objectList.remove(el);
-                System.out.println(realty_objectList);
-                customer.setMy_realty_objectList(realty_objectList);
-                customerDAO.save(customer);
-            }
-        }
-        return new ResponseEntity<>(customer,HttpStatus.OK);
+        return customerService.deleteRealtyObject(id,x);
     }
-
-
-
-
 }
