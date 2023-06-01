@@ -1,10 +1,9 @@
 package com.example.backend.dao;
 
-import com.example.backend.models.Real_Estate;
+import com.example.backend.models.enums.Real_Estate;
 import com.example.backend.models.Realty_Object;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 

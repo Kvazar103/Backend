@@ -1,4 +1,4 @@
-package com.example.backend.models;
+package com.example.backend.models.enums;
 
 public enum Real_Estate {
     Apartment,

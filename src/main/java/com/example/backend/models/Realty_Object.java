@@ -2,11 +2,12 @@ package com.example.backend.models;
 
 
 //import jakarta.persistence.*;
+import com.example.backend.models.enums.District;
+import com.example.backend.models.enums.Real_Estate;
 import lombok.*;
 
 
 import javax.persistence.*;
-import javax.swing.*;
 import java.util.*;
 
 

@@ -1,15 +1,12 @@
 package com.example.backend.models.dto;
 
-import com.example.backend.models.District;
+import com.example.backend.models.enums.District;
 import com.example.backend.models.Price;
-import com.example.backend.models.Real_Estate;
-import com.example.backend.models.Realty_Object;
+import com.example.backend.models.enums.Real_Estate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.List;
 

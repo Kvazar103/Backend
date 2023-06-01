@@ -1,6 +1,8 @@
 package com.example.backend.models;
 
 
+import com.example.backend.models.enums.Currency;
+import com.example.backend.models.enums.Type_Of_Order_Of_Real_Estate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
