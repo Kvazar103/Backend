@@ -5,6 +5,7 @@ import com.example.backend.dao.CustomerDAO;
 import com.example.backend.dao.RealtyObjectDAO;
 import com.example.backend.models.Customer;
 import com.example.backend.models.Realty_Object;
+import com.example.backend.models.dto.CustomerNoPasswordDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -114,5 +115,20 @@ public class CustomerService {
             }
         }
         return new ResponseEntity<>(customer,HttpStatus.OK);
+    }
+    public ResponseEntity<CustomerNoPasswordDTO> deleteCustomer(Integer customerId){
+        Customer customerToDelete=customerDAO.findCustomerById(customerId);
+        customerDAO.delete(customerToDelete);
+        CustomerNoPasswordDTO deletedCustomerWithoutPassword=new CustomerNoPasswordDTO(customerToDelete.getId(),customerToDelete.getName(),customerToDelete.getSurname(), customerToDelete.getEmail(), customerToDelete.getLogin(), customerToDelete.getPhone_number(), customerToDelete.getAvatar(), customerToDelete.getMy_realty_objectList(),customerToDelete.getAdded_to_favorites());
+        return new ResponseEntity<>(deletedCustomerWithoutPassword,HttpStatus.OK);
+    }
+    public ResponseEntity<List<CustomerNoPasswordDTO>> getCustomersWithoutPassword(){
+        List<Customer> list=customerDAO.findAll();
+        List<CustomerNoPasswordDTO> customerNoPasswordDTOList=new ArrayList<>();
+        for (Customer el:list){
+            CustomerNoPasswordDTO customerNoPasswordDTO=new CustomerNoPasswordDTO(el.getId(), el.getName(), el.getSurname(), el.getEmail(), el.getLogin(), el.getPhone_number(), el.getAvatar(), el.getMy_realty_objectList(),el.getAdded_to_favorites());
+            customerNoPasswordDTOList.add(customerNoPasswordDTO);
+        }
+        return new ResponseEntity<>(customerNoPasswordDTOList,HttpStatus.OK);
     }
 }

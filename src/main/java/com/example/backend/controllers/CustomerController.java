@@ -317,11 +317,16 @@ public class CustomerController {
         return new ResponseEntity<>(customerNoPasswordDTO,HttpStatus.OK);
     }
     @GetMapping("/getAllCustomers")
-    public ResponseEntity<List<Customer>> getCustomers(){
-        return new ResponseEntity<>(customerDAO.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<CustomerNoPasswordDTO>> getCustomers(){
+//        return new ResponseEntity<>(customerDAO.findAll(), HttpStatus.OK);
+        return customerService.getCustomersWithoutPassword();
     }
     @DeleteMapping("/customer/{id}/realtyObject/{x}")
     public ResponseEntity<Customer> deleteRealtyObject(@PathVariable int id,@PathVariable int x){
         return customerService.deleteRealtyObject(id,x);
+    }
+    @DeleteMapping("/customer/deleteProfile/{id}")
+    public ResponseEntity<CustomerNoPasswordDTO> deleteCustomer(@PathVariable int id){
+        return customerService.deleteCustomer(id);
     }
 }

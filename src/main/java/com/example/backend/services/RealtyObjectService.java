@@ -24,6 +24,7 @@ public class RealtyObjectService {
     public ResponseEntity<List<Map<Integer, Realty_Object>>> getSelectedRealtyObjects(String selected,String input){
         System.out.println("oooo");
         System.out.println(selected);
+        System.out.println("dffd");
         System.out.println(input);
         String[] realEstateAndTypeOfRealtyObject=selected.split(":",2);
         List<String> listRealEstateAndTypeOfRealtyObject=new ArrayList<>(List.of(realEstateAndTypeOfRealtyObject));

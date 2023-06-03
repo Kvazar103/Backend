@@ -27,7 +27,7 @@ public class Customer{
 //            "[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")
 //    @NotEmpty(message = "Email cannot be empty")
     private String email;
-//    @Column(unique = true)
+    @Column(unique = true)
     private String login;
     private String password;
     private long phone_number;
