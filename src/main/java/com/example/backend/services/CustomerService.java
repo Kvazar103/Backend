@@ -9,6 +9,7 @@ import com.example.backend.models.dto.CustomerNoPasswordDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +49,7 @@ public class CustomerService {
     }
     public void addRealtyObjectToCustomerAddedToFavoriteList(Integer id,String realty_object){
         Customer customerToUpdate =  customerDAO.findCustomerById(id);
+
         System.out.println(customerToUpdate);
         System.out.println(realty_object);
 
@@ -122,6 +125,7 @@ public class CustomerService {
         CustomerNoPasswordDTO deletedCustomerWithoutPassword=new CustomerNoPasswordDTO(customerToDelete.getId(),customerToDelete.getName(),customerToDelete.getSurname(), customerToDelete.getEmail(), customerToDelete.getLogin(), customerToDelete.getPhone_number(), customerToDelete.getAvatar(), customerToDelete.getMy_realty_objectList(),customerToDelete.getAdded_to_favorites());
         return new ResponseEntity<>(deletedCustomerWithoutPassword,HttpStatus.OK);
     }
+
     public ResponseEntity<List<CustomerNoPasswordDTO>> getCustomersWithoutPassword(){
         List<Customer> list=customerDAO.findAll();
         List<CustomerNoPasswordDTO> customerNoPasswordDTOList=new ArrayList<>();

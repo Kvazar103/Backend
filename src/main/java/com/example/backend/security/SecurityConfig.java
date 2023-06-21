@@ -4,6 +4,7 @@ import com.example.backend.dao.CustomerDAO;
 import com.example.backend.models.Customer;
 import com.example.backend.security.filters.CustomFilter;
 import lombok.AllArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.transaction.Transactional;
 import java.util.Arrays;
 
 
@@ -63,7 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             }
             return new User(customer.getLogin(),
                     customer.getPassword(),
-                    Arrays.asList(new SimpleGrantedAuthority(customer.getEmail()))
+                    Arrays.asList(new SimpleGrantedAuthority(customer.getRole()))
                     );
         });
     }
@@ -95,12 +97,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                  .authorizeRequests()
                  .antMatchers(HttpMethod.GET,"/").permitAll()
                  .antMatchers(HttpMethod.POST,"/save").permitAll()
-                 .antMatchers(HttpMethod.DELETE,"/deleteAll").permitAll()
+                 .antMatchers(HttpMethod.DELETE,"/deleteAll").authenticated()
                  .antMatchers(HttpMethod.GET,"/getAllCustomers").permitAll()
                  .antMatchers(HttpMethod.POST,"/login").permitAll()
                  .antMatchers(HttpMethod.GET,"/get12RandomRealtyObject").permitAll()
                  .antMatchers(HttpMethod.PATCH,"/customer/{id}/realtyObject/{x}").permitAll()
-                 .antMatchers(HttpMethod.PATCH,"/{id}/updateProfile").permitAll()
+                 .antMatchers(HttpMethod.PATCH,"/{id}/updateProfile").authenticated()
+                 .antMatchers(HttpMethod.POST,"/{id}/addObject").authenticated()
+                 .antMatchers(HttpMethod.PATCH,"/{id}/checkPassword").authenticated()
+                 .antMatchers(HttpMethod.PATCH,"/update/customer/{id}/addedToFavoriteList").authenticated()
+                 .antMatchers(HttpMethod.DELETE,"/delete/customer/{id}/addedToFavoriteRealtyObject/{x}").authenticated()
+                 .antMatchers(HttpMethod.DELETE,"/customer/{id}/realtyObject/{x}").authenticated()
+                 .antMatchers(HttpMethod.PATCH,"/{id}/{userId}/updateRealtyObject").authenticated()
                  .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)//щоб не зберігалася сесія
         // бо якщо буде зберігатися сесія сервак буде кешувати токен(він може мати закешований і все одно пустить якщо буде заборонено)
                  .and().cors().configurationSource(corsConfigurationSource()) //за замовчуванням дозволено зробити запит до ендпоїнтів тільки з одного сервака(запит з localhost:8080 тільки на localhost:8080)/тому ми додали додаткові

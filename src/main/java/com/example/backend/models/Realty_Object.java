@@ -1,7 +1,5 @@
 package com.example.backend.models;
 
-
-//import jakarta.persistence.*;
 import com.example.backend.models.enums.District;
 import com.example.backend.models.enums.Real_Estate;
 import lombok.*;
@@ -9,6 +7,8 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.*;
+
+import static javax.persistence.FetchType.EAGER;
 
 
 @Entity
@@ -29,50 +29,35 @@ public class Realty_Object {
     private int square;
     private String details;
 
-
     private final Date creationDate = new Date();
     private String DateOfCreation;
 
     private Date updateDate=new Date();
     private String dateOfUpdate;
-
-
-    @ElementCollection
+//    @ElementCollection
+    @ElementCollection(fetch = EAGER)
     private List<String> images=new ArrayList<>();
-//    private String images;
     @Enumerated(EnumType.STRING)
     private Real_Estate real_estate;
-    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.EAGER) ////cascadetype.all при видалені realty_object видаляється і price
+    @OneToOne(cascade = CascadeType.ALL,fetch = EAGER) ////cascadetype.all при видалені realty_object видаляється і price
     @JoinColumn(name="price_id",referencedColumnName = "id")
     private Price price;
-
-
 
     public String getDateOfCreation() {
         return DateOfCreation;
     }
-
     public void setDateOfCreation(String dateOfCreation) {
         DateOfCreation = dateOfCreation;
     }
-
     public Date getCreationDate() {
         return creationDate;
     }
-
     public Date getUpdateDate() {
         return updateDate;
     }
-
     public void setDateOfUpdate(String dateOfUpdate) {
         this.dateOfUpdate = dateOfUpdate;
     }
-    //    @ManyToOne
-//    private Customer customer;
-    //    @JoinColumn(name="realty_object_owner",referencedColumnName = "id")
-//    (cascade = CascadeType.ALL,fetch = FetchType.LAZY) //many to one uni directional(багато нерухомості до одного юзера)
-
-
     @Override
     public String toString() {
         return "Realty_Object{" +

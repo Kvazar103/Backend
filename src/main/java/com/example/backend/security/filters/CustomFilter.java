@@ -2,7 +2,9 @@ package com.example.backend.security.filters;
 
 import com.example.backend.dao.CustomerDAO;
 import com.example.backend.models.Customer;
+import com.example.backend.models.dto.CustomerLoginPasswordRoleDTO;
 import io.jsonwebtoken.Jwts;
+import org.hibernate.Hibernate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,6 +37,8 @@ public class CustomFilter extends OncePerRequestFilter {//OncePerRequestFilter �
 
         String authorization =request.getHeader("Authorization");//тут ми кажемо який хедер хочемо відхопити
         if(authorization!=null && authorization.startsWith("Bearer ")){//якщо authorization не пустий і починається з префіксу Bearer тоді це насправді токен
+            System.out.println(authorization);
+            System.out.println("filter trig");
             String token =authorization.replace("Bearer ","");//ми зможемо "відкусити" токен
             String subject= Jwts.parser() //розшифровуєм токен
                     .setSigningKey("nazar".getBytes(StandardCharsets.UTF_8)) //без наявності секретного ключа нічого не вийде
@@ -43,15 +47,18 @@ public class CustomFilter extends OncePerRequestFilter {//OncePerRequestFilter �
                     .getSubject(); //з body ми витягуємо лише саму необхідну інформацію
             System.out.println(subject);//asd
             Customer customerByLogin=customerDAO.findCustomerByLogin(subject);
+
+//            CustomerLoginPasswordRoleDTO customerLoginPasswordRoleDTO=new CustomerLoginPasswordRoleDTO(customerByLogin.getLogin(),customerByLogin.getPassword(),customerByLogin.getRole());
             System.out.println(customerByLogin);
             if(customerByLogin!=null){ //якщо ми найшли customer(бо якщо нічого не знайде в бд то воно поверне null)
                 SecurityContextHolder.getContext().setAuthentication(//аутентифікація
                         new UsernamePasswordAuthenticationToken(
                                 customerByLogin.getLogin(),
                                 customerByLogin.getPassword(),
-                                Collections.singletonList(new SimpleGrantedAuthority(null))
+                                Collections.singletonList(new SimpleGrantedAuthority(customerByLogin.getRole()))
                         )
                 );
+
             }
         }
         filterChain.doFilter(request,response);//без того не буде працювати

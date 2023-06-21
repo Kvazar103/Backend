@@ -1,6 +1,5 @@
 package com.example.backend.models;
 
-
 import com.example.backend.models.enums.Currency;
 import com.example.backend.models.enums.Type_Of_Order_Of_Real_Estate;
 import lombok.AllArgsConstructor;
@@ -9,9 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-//import jakarta.persistence.*;
-
-
 
 @Entity
 @Getter
@@ -27,11 +23,6 @@ public class Price {
     private Currency currency;
     @Enumerated(EnumType.STRING)
     private Type_Of_Order_Of_Real_Estate type_of_order_of_real_estate;
-//    @OneToOne
-//    @JoinColumn(name = "realty_object_id",referencedColumnName = "id")
-//    private Realty_Object realty_object;
-//    (cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-
 
     @Override
     public String toString() {

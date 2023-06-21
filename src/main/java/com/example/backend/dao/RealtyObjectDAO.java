@@ -9,12 +9,7 @@ import java.util.List;
 
 
 public interface RealtyObjectDAO extends JpaRepository<Realty_Object,Integer> {
-
     Realty_Object findRealty_ObjectById(Integer id);
-    void deleteRealty_ObjectsById(Integer id);
-//    List<Realty_Object> findRealty_ObjectsByAddressOrCity(String msg);
     @Query("select r from Realty_Object r where r.real_estate=:real_estate")
     List<Realty_Object> getRealty_ObjectByReal_estate(Real_Estate real_estate);
-
-
 }

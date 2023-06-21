@@ -12,6 +12,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.hibernate.Hibernate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -286,15 +287,18 @@ public class CustomerController {
         // і коли ми його тут вставляєм то спрацьовує метод configure(AuthenticationManagerBuilder auth) з SecurityConfig і якщо він його там знайде то впроваде ідентифікацію(заповнить authenticate)
         if(authenticate!=null){ //якщо authenticate заповнений тоді згенеруємо токен
             Customer customer= customerDAO.findCustomerByLogin(customerDTO.getLogin());
+            CustomerNoPasswordDTO customerWithoutPassword=new CustomerNoPasswordDTO(customer.getId(),customer.getName(),customer.getSurname(),customer.getEmail(),customer.getLogin(),customer.getPhone_number(),customer.getAvatar(),customer.getMy_realty_objectList(),customer.getAdded_to_favorites());
+
             String jwtToken= Jwts.builder().
                     setSubject(authenticate.getName()) //тут ми передаємо ім'я і саме його ми будемо кодувати
-                    .setExpiration(new Date()) //час токена
+//                    .setExpiration(new Date()) //час токена
+//                    .setExpiration(new Date(System.currentTimeMillis() + 864_000_000)) // 10 days
                     .signWith(SignatureAlgorithm.HS512,"nazar".getBytes(StandardCharsets.UTF_8)) //тут є саме кодування
                     .compact(); //це позволить зробити стрінгу яка й буде являтися токеном
             System.out.println(jwtToken);
             HttpHeaders headers=new HttpHeaders();
             headers.add("Authorization","Bearer "+jwtToken);//додаємо в хедер наш токен
-            return new ResponseEntity<>(customer,headers,HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(customerWithoutPassword,headers,HttpStatus.ACCEPTED);
         }
         return new ResponseEntity<>("zazazazaz",HttpStatus.FORBIDDEN);//якщо провірку не пройшло тоді заборонено
     }
@@ -318,7 +322,6 @@ public class CustomerController {
     }
     @GetMapping("/getAllCustomers")
     public ResponseEntity<List<CustomerNoPasswordDTO>> getCustomers(){
-//        return new ResponseEntity<>(customerDAO.findAll(), HttpStatus.OK);
         return customerService.getCustomersWithoutPassword();
     }
     @DeleteMapping("/customer/{id}/realtyObject/{x}")
