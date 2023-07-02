@@ -4,12 +4,18 @@ package com.example.backend.services;
 import com.example.backend.dao.CustomerDAO;
 import com.example.backend.dao.RealtyObjectDAO;
 import com.example.backend.models.Customer;
+import com.example.backend.models.Price;
 import com.example.backend.models.Realty_Object;
 import com.example.backend.models.dto.CustomerNoPasswordDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
+import jakarta.validation.Validation;
+import jakarta.validation.ValidatorFactory;
 import lombok.AllArgsConstructor;
 import org.hibernate.Hibernate;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,11 +23,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -44,7 +48,7 @@ public class CustomerService {
             return new ResponseEntity<>("Password true", HttpStatus.OK);
         }else {
             System.out.println("wrong");
-            return new ResponseEntity<>("Password false",HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Password false",HttpStatus.UNAUTHORIZED);
         }
     }
     public void addRealtyObjectToCustomerAddedToFavoriteList(Integer id,String realty_object){
@@ -107,9 +111,22 @@ public class CustomerService {
         Customer customer=customerDAO.findCustomerById(customerId);
         System.out.println(customer);
         List<Realty_Object> realty_objectList= customer.getMy_realty_objectList();
+        List<Integer> favoritesList=customer.getAdded_to_favorites();
         System.out.println(realty_objectList);
         for (Realty_Object el:realty_objectList) {
             if(el.getId()==realtyObjectId){
+//                for (Integer id:favoritesList){
+//                    if(Objects.equals(id, realtyObjectId)){
+//                        favoritesList.remove(id);
+//                        customer.setAdded_to_favorites(favoritesList);
+//                    }
+//                }
+                for(int i=0;i<favoritesList.size();i++){
+                    if(Objects.equals(favoritesList.get(0), realtyObjectId)){
+                        favoritesList.remove(favoritesList.get(0));
+                        customer.setAdded_to_favorites(favoritesList);
+                    }
+                }
                 System.out.println(el);
                 realty_objectList.remove(el);
                 System.out.println(realty_objectList);
@@ -134,5 +151,58 @@ public class CustomerService {
             customerNoPasswordDTOList.add(customerNoPasswordDTO);
         }
         return new ResponseEntity<>(customerNoPasswordDTOList,HttpStatus.OK);
+    }
+    public ResponseEntity<?> getCustomerById(Integer customerID){
+        Customer customer=customerDAO.findCustomerById(customerID);
+        if(customer!=null){
+            CustomerNoPasswordDTO customerNoPasswordDTO=new CustomerNoPasswordDTO(customer.getId(),
+                    customer.getName(),
+                    customer.getSurname(),
+                    customer.getEmail(),
+                    customer.getLogin(),
+                    customer.getPhone_number(),
+                    customer.getAvatar(),
+                    customer.getMy_realty_objectList(),
+                    customer.getAdded_to_favorites());
+            return new ResponseEntity<>(customerNoPasswordDTO,HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>("no such user exists",HttpStatus.NOT_FOUND);
+        }
+    }
+//    public ResponseEntity<Customer> getCustomerAfterUpdateWithPassword(Integer customerID){
+//        Customer customer=customerDAO.findCustomerById(customerID);
+//        return new ResponseEntity<>(customer,HttpStatus.OK);
+//    }
+//    public Customer getCustomerAfterUpdateWithPassword(Integer customerID){
+//            return customerDAO.findCustomerById(customerID);
+//    }
+    public List<String> validateCustomer(@Valid Customer customer){
+        ValidatorFactory factory = Validation.byDefaultProvider()
+                .configure()
+                .messageInterpolator(new ParameterMessageInterpolator())
+                .buildValidatorFactory();
+        jakarta.validation.Validator validator = factory.getValidator();
+        Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
+
+        if (!violations.isEmpty()) {
+            // Обробка помилок валідації
+            // Поверніть відповідну відповідь або викличте виключення
+            System.out.println("errors");
+            System.out.println(violations);
+            List<String> messagesErrorList = new ArrayList<>();
+
+            for (ConstraintViolation<Customer> violation : violations) {
+                String propertyPath = violation.getPropertyPath().toString();
+                String message = violation.getMessage();
+                System.out.println("Validation error: " + propertyPath + " - " + message);
+                messagesErrorList.add(message);
+            }
+            return messagesErrorList;
+        } else {
+            List<String> noError = new ArrayList<>();
+            noError.add("noErrors");
+            System.out.println("noErrors");
+            return noError;
+        }
     }
 }

@@ -8,6 +8,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+//import javax.validation.constraints.Min;
+//import javax.validation.constraints.NotBlank;
+//import javax.validation.constraints.NotNull;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Getter
@@ -18,9 +26,13 @@ public class Price {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @NotNull(message = "Sum is required")
+    @Min(value = 1, message = "Sum must be a positive number")
     private int sum;
+    @NotNull(message = "Currency is required")
     @Enumerated(EnumType.STRING)
     private Currency currency;
+    @NotNull(message = "Type of order of real estate is required")
     @Enumerated(EnumType.STRING)
     private Type_Of_Order_Of_Real_Estate type_of_order_of_real_estate;
 

@@ -46,16 +46,18 @@ public class CustomFilter extends OncePerRequestFilter {//OncePerRequestFilter �
                     .getBody() //вся інформація знаходиться тут
                     .getSubject(); //з body ми витягуємо лише саму необхідну інформацію
             System.out.println(subject);//asd
-            Customer customerByLogin=customerDAO.findCustomerByLogin(subject);
+//            Customer customerByLogin=customerDAO.findCustomerByLogin(subject);
+            Customer customerById=customerDAO.findCustomerById(Integer.parseInt(subject));
+
 
 //            CustomerLoginPasswordRoleDTO customerLoginPasswordRoleDTO=new CustomerLoginPasswordRoleDTO(customerByLogin.getLogin(),customerByLogin.getPassword(),customerByLogin.getRole());
-            System.out.println(customerByLogin);
-            if(customerByLogin!=null){ //якщо ми найшли customer(бо якщо нічого не знайде в бд то воно поверне null)
+            System.out.println(customerById);
+            if(customerById!=null){ //якщо ми найшли customer(бо якщо нічого не знайде в бд то воно поверне null)
                 SecurityContextHolder.getContext().setAuthentication(//аутентифікація
                         new UsernamePasswordAuthenticationToken(
-                                customerByLogin.getLogin(),
-                                customerByLogin.getPassword(),
-                                Collections.singletonList(new SimpleGrantedAuthority(customerByLogin.getRole()))
+                                customerById.getLogin(),
+                                customerById.getPassword(),
+                                Collections.singletonList(new SimpleGrantedAuthority(customerById.getRole()))
                         )
                 );
 
