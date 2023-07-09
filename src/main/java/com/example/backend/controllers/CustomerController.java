@@ -231,6 +231,9 @@ public class CustomerController {
             }
             customerDAO.save(customerToUpdate);
             System.out.println("abs");
+            System.out.println(customerToUpdate.getId());
+            System.out.println(customerToUpdate.getId());
+//           return customerService.getCustomerAfterLoginUpdate(customerToUpdate.getId());
 
             return new ResponseEntity<>("Updated without avatar",HttpStatus.OK);
 
@@ -398,11 +401,16 @@ public class CustomerController {
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CustomerDTO customerDTO){  //метод логін для того що віддав нам токен
+        System.out.println("Login post");
+        System.out.println(customerDTO.getLogin());
+        System.out.println(customerDTO.getPassword());
+        Customer customerByLogin=customerDAO.findCustomerByLogin(customerDTO.getLogin());
         if(!customerDAO.existsCustomerByLogin(customerDTO.getLogin())){
             System.out.println("Wrong login");
             return  new ResponseEntity<>("Error", HttpStatus.FORBIDDEN);
         }
-        Authentication authenticate= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(customerDTO.getLogin(),customerDTO.getPassword()));  //тут ми впроваджуємо об'єкт який має мати аутентифікацію(креденшили)
+//        Authentication authenticate= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(customerDTO.getLogin(),customerDTO.getPassword()));  //тут ми впроваджуємо об'єкт який має мати аутентифікацію(креденшили)
+        Authentication authenticate= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(customerByLogin.getId(),customerDTO.getPassword()));  //тут ми впроваджуємо об'єкт який має мати аутентифікацію(креденшили)
         // і коли ми його тут вставляєм то спрацьовує метод configure(AuthenticationManagerBuilder auth) з SecurityConfig і якщо він його там знайде то впроваде ідентифікацію(заповнить authenticate)
         if(authenticate!=null){ //якщо authenticate заповнений тоді згенеруємо токен
             Customer customer= customerDAO.findCustomerByLogin(customerDTO.getLogin());
@@ -437,6 +445,15 @@ public class CustomerController {
     public ResponseEntity<?> getCustomer(@PathVariable int id){
         return customerService.getCustomerById(id);
     }
+    @GetMapping("/customerAfterLoginUpdate/{id}")
+    public ResponseEntity<?> getCustomerAfterLoginUpdate(@PathVariable int id){
+        return customerService.getCustomerAfterLoginUpdate(id);
+    }
+    @GetMapping("/customerLoginAndPasswordAfterLoginUpdate/{id}")
+    public ResponseEntity<?> getCustomerLoginAndPasswordAfterLoginUpdate(@PathVariable int id){
+        return customerService.getCustomerLoginAndPasswordAfterUpdateLogin(id);
+    }
+
 //    @GetMapping("/updated/customerWithPassword/{id}")
 //    public ResponseEntity<Customer> getCustomerAfterUpdateWithPassword(@PathVariable int id){
 //
@@ -464,7 +481,7 @@ public class CustomerController {
         return customerService.deleteRealtyObject(id,x);
     }
     @DeleteMapping("/customer/deleteProfile/{id}")
-    public ResponseEntity<CustomerNoPasswordDTO> deleteCustomer(@PathVariable int id){
+    public ResponseEntity<String> deleteCustomer(@PathVariable int id){
         return customerService.deleteCustomer(id);
     }
 }

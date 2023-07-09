@@ -6,9 +6,12 @@ import com.example.backend.dao.RealtyObjectDAO;
 import com.example.backend.models.Customer;
 import com.example.backend.models.Price;
 import com.example.backend.models.Realty_Object;
+import com.example.backend.models.dto.CustomerDTO;
 import com.example.backend.models.dto.CustomerNoPasswordDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validation;
@@ -16,15 +19,20 @@ import jakarta.validation.ValidatorFactory;
 import lombok.AllArgsConstructor;
 import org.hibernate.Hibernate;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.transaction.Transactional;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -37,6 +45,8 @@ public class CustomerService {
     private PasswordEncoder passwordEncoder;
 
     BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
+    private AuthenticationManager authenticationManager;//базовий об'єкт який займається процесом аутентифікації
+
 
     public ResponseEntity<String> ifPasswordMatchesSave(Integer customerID, String oldPassword, String newPassword){
         Customer customerToCheck=customerDAO.findCustomerById(customerID);
@@ -136,11 +146,11 @@ public class CustomerService {
         }
         return new ResponseEntity<>(customer,HttpStatus.OK);
     }
-    public ResponseEntity<CustomerNoPasswordDTO> deleteCustomer(Integer customerId){
+    public ResponseEntity<String> deleteCustomer(Integer customerId){
         Customer customerToDelete=customerDAO.findCustomerById(customerId);
         customerDAO.delete(customerToDelete);
         CustomerNoPasswordDTO deletedCustomerWithoutPassword=new CustomerNoPasswordDTO(customerToDelete.getId(),customerToDelete.getName(),customerToDelete.getSurname(), customerToDelete.getEmail(), customerToDelete.getLogin(), customerToDelete.getPhone_number(), customerToDelete.getAvatar(), customerToDelete.getMy_realty_objectList(),customerToDelete.getAdded_to_favorites());
-        return new ResponseEntity<>(deletedCustomerWithoutPassword,HttpStatus.OK);
+        return new ResponseEntity<>("Delete",HttpStatus.OK);
     }
 
     public ResponseEntity<List<CustomerNoPasswordDTO>> getCustomersWithoutPassword(){
@@ -169,6 +179,50 @@ public class CustomerService {
             return new ResponseEntity<>("no such user exists",HttpStatus.NOT_FOUND);
         }
     }
+    public ResponseEntity<?> getCustomerAfterLoginUpdate(Integer customerID){
+        Customer customer=customerDAO.findCustomerById(customerID);
+        System.out.println("service trig");
+        System.out.println(customer.getName());
+        System.out.println(customer.getLogin());
+        Map<CustomerNoPasswordDTO,String> customerAndToken=new HashMap<>();
+
+        if(customer!=null){
+            Authentication authenticate= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(customer.getLogin(),customer.getPassword()));  //тут ми впроваджуємо об'єкт який має мати аутентифікацію(креденшили)
+
+            CustomerNoPasswordDTO customerWithoutPassword=new CustomerNoPasswordDTO(customer.getId(),
+                   customer.getName(),
+                   customer.getSurname(),
+                   customer.getEmail(),
+                   customer.getLogin(),
+                   customer.getPhone_number(),
+                   customer.getAvatar(),
+                   customer.getMy_realty_objectList(),
+                   customer.getAdded_to_favorites());
+            String jwtToken= Jwts.builder()
+                    .setSubject(authenticate.getName())
+                    .signWith(SignatureAlgorithm.HS512,"nazar".getBytes(StandardCharsets.UTF_8))
+                    .compact();
+            System.out.println(jwtToken);
+            HttpHeaders headers=new HttpHeaders();
+            headers.add("Authorization","Bearer "+jwtToken);
+            customerAndToken.put(customerWithoutPassword,jwtToken);
+            return new ResponseEntity<>(customerAndToken,headers,HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>("no such user exists",HttpStatus.NOT_FOUND);
+        }
+    }
+    public ResponseEntity<?> getCustomerLoginAndPasswordAfterUpdateLogin(Integer customerID){
+        Customer customer=customerDAO.findCustomerById(customerID);
+        if(customer!=null){
+            CustomerDTO customerDTO=new CustomerDTO(customer.getLogin(), customer.getPassword());
+            return new ResponseEntity<>(customerDTO,HttpStatus.OK);
+        }else {
+            return new ResponseEntity<>("not found",HttpStatus.NOT_FOUND);
+        }
+
+    }
+
+
 //    public ResponseEntity<Customer> getCustomerAfterUpdateWithPassword(Integer customerID){
 //        Customer customer=customerDAO.findCustomerById(customerID);
 //        return new ResponseEntity<>(customer,HttpStatus.OK);

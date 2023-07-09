@@ -148,7 +148,7 @@ public class RealtyObjectController {
                 });
 
                 System.out.println(realty_objectToUpdate);
-//                realtyObjectDAO.save(realty_objectToUpdate);
+                realtyObjectDAO.save(realty_objectToUpdate);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -441,7 +441,7 @@ public class RealtyObjectController {
 //            });
             System.out.println(newRealtyObject);
             customerList.add(newRealtyObject);
-//            realtyObjectDAO.save(newRealtyObject);
+            realtyObjectDAO.save(newRealtyObject);
 //            customerList.add(object);
 //            realtyObjectDAO.save(object);
                 // Handle the validation errors

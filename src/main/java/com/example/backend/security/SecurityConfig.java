@@ -58,12 +58,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             System.out.println("login trig");
             System.out.println(username);
 
-            Customer customer=customerDAO.findCustomerByLogin(username);
+//            Customer customer=customerDAO.findCustomerByLogin(username);
+            Customer customer=customerDAO.findCustomerById(Integer.valueOf(username));
             if(!customerDAO.existsCustomerByLogin(username)){
                 System.out.println("Wrong login");
 
             }
-            return new User(customer.getLogin(),
+            return new User(
+//                    customer.getLogin(),
+                    Integer.toString(customer.getId()),
                     customer.getPassword(),
                     Arrays.asList(new SimpleGrantedAuthority(customer.getRole()))
                     );
@@ -110,6 +113,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                  .antMatchers(HttpMethod.DELETE,"/customer/{id}/realtyObject/{x}").authenticated()
                  .antMatchers(HttpMethod.PATCH,"/{id}/{userId}/updateRealtyObject").authenticated()
                  .antMatchers(HttpMethod.GET,"/updated/customerWithPassword/{id}").authenticated()
+                 .antMatchers(HttpMethod.DELETE,"/customer/deleteProfile/{id}").authenticated()
+                 .antMatchers(HttpMethod.GET,"/customerAfterLoginUpdate/{id}").permitAll()
+                 .antMatchers(HttpMethod.GET,"/customerLoginAndPasswordAfterLoginUpdate/{id}").permitAll()
                  .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)//щоб не зберігалася сесія
         // бо якщо буде зберігатися сесія сервак буде кешувати токен(він може мати закешований і все одно пустить якщо буде заборонено)
                  .and().cors().configurationSource(corsConfigurationSource()) //за замовчуванням дозволено зробити запит до ендпоїнтів тільки з одного сервака(запит з localhost:8080 тільки на localhost:8080)/тому ми додали додаткові
