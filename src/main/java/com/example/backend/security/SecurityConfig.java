@@ -60,10 +60,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 //            Customer customer=customerDAO.findCustomerByLogin(username);
             Customer customer=customerDAO.findCustomerById(Integer.valueOf(username));
-            if(!customerDAO.existsCustomerByLogin(username)){
-                System.out.println("Wrong login");
+//            if(!customerDAO.existsCustomerByLogin(username)){
+//                System.out.println("Wrong login");
+//
+//            }
 
-            }
             return new User(
 //                    customer.getLogin(),
                     Integer.toString(customer.getId()),
