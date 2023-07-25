@@ -1,6 +1,5 @@
 package com.example.backend.services;
 
-
 import com.example.backend.dao.CustomerDAO;
 import com.example.backend.dao.RealtyObjectDAO;
 import com.example.backend.models.Customer;
@@ -8,23 +7,15 @@ import com.example.backend.models.Price;
 import com.example.backend.models.enums.Real_Estate;
 import com.example.backend.models.Realty_Object;
 import com.example.backend.models.enums.Type_Of_Order_Of_Real_Estate;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.validation.*;
 import lombok.AllArgsConstructor;
-import org.hibernate.cfg.Settings;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
-
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -35,14 +26,6 @@ public class RealtyObjectService {
     @Autowired
     private RealtyObjectDAO realtyObjectDAO;
     private CustomerDAO customerDAO;
-//    @Autowired
-//    private Validator validator;
-
-//    @Autowired
-//    public RealtyObjectService(Validator validator) {
-//        this.validator = validator;
-//    }
-
 
     public ResponseEntity<List<Map<Integer, Realty_Object>>> getSelectedRealtyObjects(String selected,String input){
         System.out.println(selected);
@@ -71,7 +54,6 @@ public class RealtyObjectService {
                                 mapOfCustomerIdAndRealtyObject.put(customer.getId(), realty_object);
                                 listOfCustomerIdAndRealtyObject.add(mapOfCustomerIdAndRealtyObject);
                             }
-
                         }
                     }
                 }
@@ -91,75 +73,6 @@ public class RealtyObjectService {
             return new ResponseEntity<>(newList,HttpStatus.OK);
         }
     }
-
-//    public ResponseEntity<?> processRealtyObject(@Valid Realty_Object realtyObject) {
-////        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-//        ValidatorFactory factory = Validation.byDefaultProvider()
-//         .configure()
-//                .messageInterpolator(new ParameterMessageInterpolator())
-//                .buildValidatorFactory();
-//        jakarta.validation.Validator validator = factory.getValidator();
-//        Set<ConstraintViolation<Realty_Object>> violations = validator.validate(realtyObject);
-//        if (!violations.isEmpty()) {
-//            // Обробка помилок валідації
-//            // Поверніть відповідну відповідь або викличте виключення
-//            System.out.println("errors");
-//            System.out.println(violations);
-//            List<String> messagesErrorList=new ArrayList<>();
-//            for (ConstraintViolation<Realty_Object> violation : violations) {
-//                String propertyPath = violation.getPropertyPath().toString();
-//                String message = violation.getMessage();
-//                System.out.println("Validation error: " + propertyPath + " - " + message);
-//                messagesErrorList.add(message);
-//            }
-//            return new ResponseEntity<>(messagesErrorList,HttpStatus.BAD_REQUEST);
-//
-//        }else {
-//            System.out.println("no errors");
-//            return new ResponseEntity<>("No errors",HttpStatus.OK);
-//        }
-//    }
-
-//    public List<String> processRealtyObject(@Valid Realty_Object realtyObject,@Valid Price realtyObjectPrice) {
-//        ValidatorFactory factory = Validation.byDefaultProvider()
-//                .configure()
-//                .messageInterpolator(new ParameterMessageInterpolator())
-//                .buildValidatorFactory();
-//        jakarta.validation.Validator validator = factory.getValidator();
-//        Set<ConstraintViolation<Realty_Object>> violations = validator.validate(realtyObject);
-//        Set<ConstraintViolation<Price>> violationsPrice = validator.validate(realtyObjectPrice);
-//
-//        if (!violations.isEmpty() || !violationsPrice.isEmpty()) {
-//            // Обробка помилок валідації
-//            // Поверніть відповідну відповідь або викличте виключення
-//            System.out.println("errors");
-//            System.out.println(violations);
-//            List<String> messagesErrorList=new ArrayList<>();
-//
-//            for (ConstraintViolation<Realty_Object> violation : violations) {
-//                String propertyPath = violation.getPropertyPath().toString();
-//                String message = violation.getMessage();
-//                System.out.println("Validation error: " + propertyPath + " - " + message);
-//                messagesErrorList.add(message);
-//            }
-//            for (ConstraintViolation<Price> violationPrice : violationsPrice){
-//                String propertyPathPrice = violationPrice.getPropertyPath().toString();
-//                String messagePrice = violationPrice.getMessage();
-//                System.out.println("Validation error: " + propertyPathPrice + " - " + messagePrice);
-//                messagesErrorList.add(messagePrice);
-//            }
-//            return messagesErrorList;
-//
-//
-//
-//        }
-//        else {
-//            List<String> noError=new ArrayList<>();
-//            noError.add("noErrors");
-//            System.out.println("noErrors");
-//            return noError;
-//        }
-//    }
     public List<String> validateRealtyObject(@Valid Realty_Object realtyObject,@Valid Price realtyObjectPrice) {
         ValidatorFactory factory = Validation.byDefaultProvider()
                 .configure()

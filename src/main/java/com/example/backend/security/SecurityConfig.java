@@ -4,12 +4,9 @@ import com.example.backend.dao.CustomerDAO;
 import com.example.backend.models.Customer;
 import com.example.backend.security.filters.CustomFilter;
 import lombok.AllArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,15 +22,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.transaction.Transactional;
 import java.util.Arrays;
-
 
 @Configuration  //анотація щоб створювати @BEAN
 @EnableWebSecurity  //впроваджує дефолтні налаштування щоб наше секюріті почала обробку запитів
 @AllArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
     private CustomerDAO customerDAO;
 
     @Bean // те що повертається з метода робиться об'єктом і кладе його під контейнер(який можна використовувати в MainController
@@ -57,16 +51,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         auth.userDetailsService(username -> { //знайти обєкт в бд
             System.out.println("login trig");
             System.out.println(username);
-
-//            Customer customer=customerDAO.findCustomerByLogin(username);
             Customer customer=customerDAO.findCustomerById(Integer.valueOf(username));
-//            if(!customerDAO.existsCustomerByLogin(username)){
-//                System.out.println("Wrong login");
-//
-//            }
 
             return new User(
-//                    customer.getLogin(),
                     Integer.toString(customer.getId()),
                     customer.getPassword(),
                     Arrays.asList(new SimpleGrantedAuthority(customer.getRole()))

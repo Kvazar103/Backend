@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,6 @@ public class CustomerNoPasswordDTO {
     private long phone_number;
     private String avatar;
     private List<Realty_Object> my_realty_objectList;
-
 
     private List<Integer> added_to_favorites=new ArrayList<>();
 

@@ -8,25 +8,17 @@ import com.example.backend.models.Realty_Object;
 import com.example.backend.services.CustomerService;
 import com.example.backend.services.RealtyObjectService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-//import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,13 +40,11 @@ public class RealtyObjectController {
 
     @PatchMapping("/{id}/{userId}/updateRealtyObject")
     public ResponseEntity<?> updateRealtyObject(@PathVariable int id, @PathVariable int userId, @RequestParam("realty_object") String realtyObject, @RequestParam(value = "images_to_add",required = false) MultipartFile[] imagesToAdd, @RequestParam(value = "currentImages_to_delete",required = false) String[] imagesToDelete) throws IOException {
-        System.out.println("controller start");
         System.out.println(realtyObject);
         System.out.println(id);
         System.out.println(userId);
         System.out.println(Arrays.toString(imagesToAdd));
         System.out.println(Arrays.toString(imagesToDelete));
-        System.out.println("controller end");
 
         Realty_Object realty_objectToUpdate=realtyObjectDAO.findRealty_ObjectById(id);
         System.out.println(realty_objectToUpdate);
@@ -75,7 +65,6 @@ public class RealtyObjectController {
                 realty_objectToUpdate.setSquare(object.getSquare());
                 realty_objectToUpdate.setDetails(object.getDetails());
                 realty_objectToUpdate.setReal_estate(object.getReal_estate());
-//                realty_objectToUpdate.setPrice(object.getPrice());
                 realty_objectToUpdate.setDateOfUpdate(formater.format(object.getUpdateDate()));
 
                 realty_objectToUpdate.getPrice().setCurrency(object.getPrice().getCurrency());
@@ -83,7 +72,6 @@ public class RealtyObjectController {
                 realty_objectToUpdate.getPrice().setType_of_order_of_real_estate(object.getPrice().getType_of_order_of_real_estate());
 
                 List<String> responses= realtyObjectService.validateRealtyObject(realty_objectToUpdate,realty_objectToUpdate.getPrice());
-                System.out.println("response");
                 System.out.println(responses);
                 if(responses.size()>0 && responses.get(0).equals("noErrors")){
                     System.out.println("noError");
@@ -103,7 +91,6 @@ public class RealtyObjectController {
             System.out.println("New images and some current images need to delete");
             try {
                 Realty_Object object=mapper.readValue(realtyObject,Realty_Object.class);
-                System.out.println("new images and delete images");
                 realty_objectToUpdate.setDistrict(object.getDistrict());
                 realty_objectToUpdate.setAddress(object.getAddress());
                 realty_objectToUpdate.setApt_suite_building(object.getApt_suite_building());
@@ -111,7 +98,6 @@ public class RealtyObjectController {
                 realty_objectToUpdate.setSquare(object.getSquare());
                 realty_objectToUpdate.setDetails(object.getDetails());
                 realty_objectToUpdate.setReal_estate(object.getReal_estate());
-//                realty_objectToUpdate.setPrice(object.getPrice());
                 realty_objectToUpdate.setDateOfUpdate(formater.format(object.getUpdateDate()));
 
                 realty_objectToUpdate.getPrice().setCurrency(object.getPrice().getCurrency());
@@ -119,7 +105,6 @@ public class RealtyObjectController {
                 realty_objectToUpdate.getPrice().setType_of_order_of_real_estate(object.getPrice().getType_of_order_of_real_estate());
 
                 List<String> responses= realtyObjectService.validateRealtyObject(realty_objectToUpdate,realty_objectToUpdate.getPrice());
-                System.out.println("response");
                 System.out.println(responses);
                 if(responses.size()>0 && responses.get(0).equals("noErrors")){
                     System.out.println("noError");
@@ -128,7 +113,6 @@ public class RealtyObjectController {
                     System.out.println(responses);
                     return new ResponseEntity<>(responses,HttpStatus.BAD_REQUEST);
                 }
-
                 String uId=userId+"id";
                 System.out.println(uId);
                 String home = System.getProperty("user.home");
@@ -156,7 +140,6 @@ public class RealtyObjectController {
             String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
                     File.separator;
             System.out.println(Arrays.toString(imagesToDelete));
-//            String imagesToDeletePathArray = Arrays.toString(imagesToDelete);
             List<String> imagesToDeletePathArray = new ArrayList<>(List.of(imagesToDelete));
             System.out.println(imagesToDeletePathArray);
             List<String> imagesNames=new ArrayList<>();
@@ -166,7 +149,6 @@ public class RealtyObjectController {
                 System.out.println(splittedPath);
                 System.out.println(splittedPath.get(splittedPath.size()-1));
                 imagesNames.add(splittedPath.get(splittedPath.size()-1));
-                System.out.println("cycle");
                 System.out.println(imagesNames);
             }
 
@@ -205,11 +187,8 @@ public class RealtyObjectController {
                 }
             }
             return new ResponseEntity<>(realty_objectToUpdate,HttpStatus.OK);
-
-
         } else if (imagesToAdd==null && imagesToDelete!=null) {
             System.out.println("There are no new images but need to delete current images");
-
             String home = System.getProperty("user.home");
             String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
                     File.separator;
@@ -223,7 +202,6 @@ public class RealtyObjectController {
                 System.out.println(splittedPath);
                 System.out.println(splittedPath.get(splittedPath.size()-1));
                 imagesNames.add(splittedPath.get(splittedPath.size()-1));
-                System.out.println("cycle");
                 System.out.println(imagesNames);
             }
 
@@ -236,7 +214,6 @@ public class RealtyObjectController {
                 realty_objectToUpdate.setSquare(object.getSquare());
                 realty_objectToUpdate.setDetails(object.getDetails());
                 realty_objectToUpdate.setReal_estate(object.getReal_estate());
-//                realty_objectToUpdate.setPrice(object.getPrice());
                 realty_objectToUpdate.setDateOfUpdate(formater.format(object.getUpdateDate()));
 
                 realty_objectToUpdate.getPrice().setCurrency(object.getPrice().getCurrency());
@@ -246,7 +223,6 @@ public class RealtyObjectController {
                 List<String> imagesInRealty = new ArrayList<>(realty_objectToUpdate.getImages());
 
                 List<String> responses= realtyObjectService.validateRealtyObject(realty_objectToUpdate,realty_objectToUpdate.getPrice());
-                System.out.println("response");
                 System.out.println(responses);
                 if(responses.size()>0 && responses.get(0).equals("noErrors")){
                     System.out.println("noError");
@@ -270,7 +246,6 @@ public class RealtyObjectController {
                 realty_objectToUpdate.setImages(imagesInRealty);
 
                 System.out.println(imagesInRealty);
-
                 System.out.println(realty_objectToUpdate);
                 realtyObjectDAO.save(realty_objectToUpdate);
             } catch (JsonProcessingException e) {
@@ -298,7 +273,6 @@ public class RealtyObjectController {
 
             try {
                 Realty_Object object=mapper.readValue(realtyObject,Realty_Object.class);
-                System.out.println("new images");
                 realty_objectToUpdate.setDistrict(object.getDistrict());
                 realty_objectToUpdate.setAddress(object.getAddress());
                 realty_objectToUpdate.setApt_suite_building(object.getApt_suite_building());
@@ -306,7 +280,6 @@ public class RealtyObjectController {
                 realty_objectToUpdate.setSquare(object.getSquare());
                 realty_objectToUpdate.setDetails(object.getDetails());
                 realty_objectToUpdate.setReal_estate(object.getReal_estate());
-//                realty_objectToUpdate.setPrice(object.getPrice());
                 realty_objectToUpdate.setDateOfUpdate(formater.format(object.getUpdateDate()));
 
                 realty_objectToUpdate.getPrice().setCurrency(object.getPrice().getCurrency());
@@ -314,7 +287,6 @@ public class RealtyObjectController {
                 realty_objectToUpdate.getPrice().setType_of_order_of_real_estate(object.getPrice().getType_of_order_of_real_estate());
 
                 List<String> responses= realtyObjectService.validateRealtyObject(realty_objectToUpdate,realty_objectToUpdate.getPrice());
-                System.out.println("response");
                 System.out.println(responses);
                 if(responses.size()>0 && responses.get(0).equals("noErrors")){
                     System.out.println("noError");
@@ -355,7 +327,6 @@ public class RealtyObjectController {
     public ResponseEntity<?> addObject(@PathVariable int id,@RequestParam("body") String realty_object, @RequestParam MultipartFile[] images)  {
 
         System.out.println(realty_object);
-        System.out.println("check");
         Customer customer=customerDAO.findCustomerById(id);
         List<Realty_Object> customerList=customer.getMy_realty_objectList();
         SimpleDateFormat formater = new SimpleDateFormat("dd.MM.yyyy");
@@ -379,7 +350,6 @@ public class RealtyObjectController {
             newRealtyObject.setDetails(object.getDetails());
 
            List<String> responses= realtyObjectService.validateRealtyObject(newRealtyObject,newRealtyObject.getPrice());
-           System.out.println("response");
            System.out.println(responses);
            if(responses.size()>0 && responses.get(0).equals("noErrors")){
                System.out.println("noError");
@@ -388,29 +358,13 @@ public class RealtyObjectController {
                System.out.println(responses);
                return new ResponseEntity<>(responses,HttpStatus.BAD_REQUEST);
            }
-//            Realty_Object newRealtyObject=new Realty_Object(object.getDistrict(),
-//                    object.getAddress(),
-//                    object.getApt_suite_building(),
-//                    object.getRooms(),
-//                    object.getSquare(),
-//                    object.getDetails(),
-//                    object.getImages(),
-//                    object.getReal_estate(),
-//                    object.getPrice());
-//
-//            System.out.println(newRealtyObject);
-//            object.setDateOfCreation(formater.format(object.getCreationDate()));
-
-            System.out.println("realty check");
             System.out.println(object);
 
             String home = System.getProperty("user.home");
 
             String path= home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
                     File.separator+"images"+File.separator;
-//        String directoryName = path.concat(customer.getName()+customer.getSurname());
             String directoryName = path.concat(customer.getId()+"id");
-//        String fileName = id + getTimeStamp() + ".txt";
 
             File directory = new File(directoryName);
             if (! directory.exists()){
@@ -428,23 +382,9 @@ public class RealtyObjectController {
                 images1.add(multipartFile.getOriginalFilename());
 
             });
-//            List<String> images1 = object.getImages();
-//            Arrays.asList(images).stream().forEach(multipartFile -> {
-//                try {
-//                    multipartFile.transferTo(new File(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
-//                            File.separator+"images"+File.separator+directory.getName()+File.separator+multipartFile.getOriginalFilename()));
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//                images1.add(multipartFile.getOriginalFilename());
-//
-//            });
             System.out.println(newRealtyObject);
             customerList.add(newRealtyObject);
             realtyObjectDAO.save(newRealtyObject);
-//            customerList.add(object);
-//            realtyObjectDAO.save(object);
-                // Handle the validation errors
             return new ResponseEntity<>(newRealtyObject,HttpStatus.CREATED);
 
         }catch (IOException e) {

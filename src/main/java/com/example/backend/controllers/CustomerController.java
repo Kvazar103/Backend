@@ -12,7 +12,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.hibernate.Hibernate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +29,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @AllArgsConstructor
@@ -65,8 +62,7 @@ public class CustomerController {
             newCustomer.setPhone_number(object.getPhone_number());
 
             List<String> responses= customerService.validateCustomer(newCustomer);
-            System.out.println("response");
-            System.out.println(responses);
+
             if(responses.size()>0 && responses.get(0).equals("noErrors")){
                 System.out.println("noError");
             }else if(responses.size()>0){
@@ -77,7 +73,6 @@ public class CustomerController {
 
             System.out.println(newCustomer);
             newCustomer.setPassword(passwordEncoder.encode(object.getPassword()));
-
 
             String home = System.getProperty("user.home");
 
@@ -100,7 +95,6 @@ public class CustomerController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-//       customerDAO.save(customer);
     }
     @PatchMapping("/{id}/updateProfile")
     public ResponseEntity<?> updateProfile(@PathVariable int id,@RequestParam("customer") String customer,@RequestParam(required = false) MultipartFile avatar,@RequestParam(required = false) String message) throws IOException{
@@ -108,7 +102,6 @@ public class CustomerController {
         ObjectMapper mapper=new ObjectMapper();
         Customer customerToUpdate= customerDAO.findCustomerById(id);
         System.out.println(customerToUpdate);
-
 
         if(message!=null && message.equals("Deleted")){
             String home = System.getProperty("user.home");
@@ -135,13 +128,11 @@ public class CustomerController {
                 customerToUpdate.setPhone_number(object.getPhone_number());
 
                 List<String> responses= customerService.validateCustomer(customerToUpdate);
-                System.out.println("response");
                 System.out.println(responses);
                 if(responses.size()>0 && responses.get(0).equals("noErrors")){
                     System.out.println("noError");
                 }else if(responses.size()>0){
                     System.out.println("Errors");
-                    System.out.println(responses);
                     return new ResponseEntity<>(responses,HttpStatus.BAD_REQUEST);
                 }
                 System.out.println(customerToUpdate);
@@ -179,10 +170,8 @@ public class CustomerController {
                     System.out.println(existingCustomer.getName()+" "+existingCustomer.getLogin());
                     System.out.println(object.getId());
                 }
-                System.out.println("PPPPP");
                 if(!isCustomerExists){
                     customerToUpdate.setLogin(object.getLogin());
-                    System.out.println("!isCustomerExists");
                 }else if(existingCustomer.getId() == customerToUpdate.getId()){
 //                    customerToUpdate.setLogin(object.getLogin());
                     System.out.println("isCustomerExists && existingCustomer.getId()==object.getId()");
@@ -191,11 +180,9 @@ public class CustomerController {
                     return new ResponseEntity<>("Login already used",HttpStatus.BAD_REQUEST);
                 }
 
-
                 customerToUpdate.setPhone_number(object.getPhone_number());
 
                 List<String> responses= customerService.validateCustomer(customerToUpdate);
-                System.out.println("response");
                 System.out.println(responses);
                 if(responses.size()>0 && responses.get(0).equals("noErrors")){
                     System.out.println("noError");
@@ -204,10 +191,7 @@ public class CustomerController {
                     System.out.println(responses);
                     return new ResponseEntity<>(responses,HttpStatus.BAD_REQUEST);
                 }
-                System.out.println("dfssdfsd");
                 System.out.println(customerToUpdate);
-//                System.out.println(message);
-//                System.out.println(avatar);
 
                 File newDir=new File(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
                         File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator+customerToUpdate.getAvatar());
@@ -215,7 +199,6 @@ public class CustomerController {
                 Path newSource=Paths.get(home+ File.separator+"Desktop"+File.separator+"real_estate_images_from_users"+
                         File.separator+"images"+File.separator+customerToUpdate.getName()+customerToUpdate.getSurname()+"_avatar"+File.separator);
                 Files.move(oldSource,newSource);
-//                customerDAO.save(customerToUpdate);
 
                 File fileList =oldDir.getCanonicalFile();
                 System.out.println(fileList);
@@ -223,18 +206,11 @@ public class CustomerController {
                 boolean b = oldDir.renameTo(newDir);
                 System.out.println(b);
 
-                System.out.println("abs");
-//                customerDAO.save(customerToUpdate);
-
             } catch (IOException ignored) {
 
             }
             customerDAO.save(customerToUpdate);
-            System.out.println("abs");
             System.out.println(customerToUpdate.getId());
-            System.out.println(customerToUpdate.getId());
-//           return customerService.getCustomerAfterLoginUpdate(customerToUpdate.getId());
-
             return new ResponseEntity<>("Updated without avatar",HttpStatus.OK);
 
         }else if(avatar == null){
@@ -260,12 +236,10 @@ public class CustomerController {
                     System.out.println(existingCustomer.getName()+" "+existingCustomer.getLogin());
                     System.out.println(object.getId());
                 }
-                System.out.println("PPPPP");
                 if(!isCustomerExists){
                     customerToUpdate.setLogin(object.getLogin());
                     System.out.println("!isCustomerExists");
                 }else if(existingCustomer.getId() == customerToUpdate.getId()){
-//                    customerToUpdate.setLogin(object.getLogin());
                     System.out.println("isCustomerExists && existingCustomer.getId()==object.getId()");
                 }else if(existingCustomer.getId() != customerToUpdate.getId()){
                     System.out.println(" msg with Login already used");
@@ -274,7 +248,6 @@ public class CustomerController {
                 customerToUpdate.setPhone_number(object.getPhone_number());
 
                 List<String> responses= customerService.validateCustomer(customerToUpdate);
-                System.out.println("response");
                 System.out.println(responses);
                 if(responses.size()>0 && responses.get(0).equals("noErrors")){
                     System.out.println("noError");
@@ -283,10 +256,8 @@ public class CustomerController {
                     System.out.println(responses);
                     return new ResponseEntity<>(responses,HttpStatus.BAD_REQUEST);
                 }
-                System.out.println("dfssdfsd");
                 System.out.println(customerToUpdate);
                 System.out.println(message);
-//                System.out.println(avatar);
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -301,8 +272,6 @@ public class CustomerController {
                 throw new RuntimeException(e);
             }
             File nDirectory=new File(newDirectory);
-//            File directory = new File(directoryOldName);
-
             if (! nDirectory.exists()){
                 nDirectory.mkdir();
                 // If you require it to make the entire directory path including parents,
@@ -331,12 +300,10 @@ public class CustomerController {
                     System.out.println(existingCustomer.getName()+" "+existingCustomer.getLogin());
                     System.out.println(object.getId());
                 }
-                System.out.println("PPPPP");
                 if(!isCustomerExists){
                     customerToUpdate.setLogin(object.getLogin());
                     System.out.println("!isCustomerExists");
                 }else if(existingCustomer.getId() == customerToUpdate.getId()){
-//                    customerToUpdate.setLogin(object.getLogin());
                     System.out.println("isCustomerExists && existingCustomer.getId()==object.getId()");
                 }else if(existingCustomer.getId() != customerToUpdate.getId()){
                     System.out.println(" msg with Login already used");
@@ -345,7 +312,6 @@ public class CustomerController {
                 customerToUpdate.setPhone_number(object.getPhone_number());
 
                 List<String> responses= customerService.validateCustomer(customerToUpdate);
-                System.out.println("response");
                 System.out.println(responses);
                 if(responses.size()>0 && responses.get(0).equals("noErrors")){
                     System.out.println("noError");
@@ -354,11 +320,9 @@ public class CustomerController {
                     System.out.println(responses);
                     return new ResponseEntity<>(responses,HttpStatus.BAD_REQUEST);
                 }
-                System.out.println("dfssdfsd");
                 System.out.println(customerToUpdate);
                 System.out.println(message);
                 System.out.println(avatar);
-
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -387,7 +351,6 @@ public class CustomerController {
                 throw new RuntimeException(e);
             }
             return new ResponseEntity<>("Avatar not null",HttpStatus.OK);
-
         }
         return new ResponseEntity<>("...",HttpStatus.OK);
     }
@@ -401,7 +364,6 @@ public class CustomerController {
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CustomerDTO customerDTO){  //метод логін для того що віддав нам токен
-        System.out.println("Login post");
         System.out.println(customerDTO.getLogin());
         System.out.println(customerDTO.getPassword());
         Customer customerByLogin=customerDAO.findCustomerByLogin(customerDTO.getLogin());
@@ -409,29 +371,18 @@ public class CustomerController {
             System.out.println("Wrong login");
             return  new ResponseEntity<>("Error", HttpStatus.FORBIDDEN);
         }
-//        Authentication authenticate= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(customerDTO.getLogin(),customerDTO.getPassword()));  //тут ми впроваджуємо об'єкт який має мати аутентифікацію(креденшили)
         Authentication authenticate= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(customerByLogin.getId(),customerDTO.getPassword()));  //тут ми впроваджуємо об'єкт який має мати аутентифікацію(креденшили)
         // і коли ми його тут вставляєм то спрацьовує метод configure(AuthenticationManagerBuilder auth) з SecurityConfig і якщо він його там знайде то впроваде ідентифікацію(заповнить authenticate)
         if(authenticate!=null){ //якщо authenticate заповнений тоді згенеруємо токен
             Customer customer= customerDAO.findCustomerByLogin(customerDTO.getLogin());
             CustomerNoPasswordDTO customerWithoutPassword=new CustomerNoPasswordDTO(customer.getId(),customer.getName(),customer.getSurname(),customer.getEmail(),customer.getLogin(),customer.getPhone_number(),customer.getAvatar(),customer.getMy_realty_objectList(),customer.getAdded_to_favorites());
 
-//            String jwtToken= Jwts.builder().
-//                    setSubject(authenticate.getName()) //тут ми передаємо ім'я і саме його ми будемо кодувати
-////                    .setExpiration(new Date()) //час токена
-////                    .setExpiration(new Date(System.currentTimeMillis() + 864_000_000)) // 10 days
-//                    .signWith(SignatureAlgorithm.HS512,"nazar".getBytes(StandardCharsets.UTF_8)) //тут є саме кодування
-//                    .compact(); //це позволить зробити стрінгу яка й буде являтися токеном
-//            System.out.println(jwtToken);
             String jwtToken2= Jwts.builder().
                     setSubject(Integer.toString(customer.getId()))
-//                    .setExpiration(new Date()) //час токена
-//                    .setExpiration(new Date(System.currentTimeMillis() + 864_000_000)) // 10 days
                     .signWith(SignatureAlgorithm.HS512,"nazar".getBytes(StandardCharsets.UTF_8)) //тут є саме кодування
                     .compact(); //це позволить зробити стрінгу яка й буде являтися токеном
             System.out.println(jwtToken2);
             HttpHeaders headers=new HttpHeaders();
-//            headers.add("Authorization","Bearer "+jwtToken);//додаємо в хедер наш токен
             headers.add("Authorization","Bearer "+jwtToken2);//додаємо в хедер наш токен
             return new ResponseEntity<>(customerWithoutPassword,headers,HttpStatus.ACCEPTED);
         }
@@ -453,25 +404,6 @@ public class CustomerController {
     public ResponseEntity<?> getCustomerLoginAndPasswordAfterLoginUpdate(@PathVariable int id){
         return customerService.getCustomerLoginAndPasswordAfterUpdateLogin(id);
     }
-
-//    @GetMapping("/updated/customerWithPassword/{id}")
-//    public ResponseEntity<Customer> getCustomerAfterUpdateWithPassword(@PathVariable int id){
-//
-//        Customer customer =customerService.getCustomerAfterUpdateWithPassword(id);
-//        Authentication authenticate= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(customer.getLogin(),customer.getPassword()));  //тут ми впроваджуємо об'єкт який має мати аутентифікацію(креденшили)
-//
-//        String jwtToken= Jwts.builder().
-//                setSubject(authenticate.getName()) //тут ми передаємо ім'я і саме його ми будемо кодувати
-////                    .setExpiration(new Date()) //час токена
-////                    .setExpiration(new Date(System.currentTimeMillis() + 864_000_000)) // 10 days
-//                .signWith(SignatureAlgorithm.HS512,"nazar".getBytes(StandardCharsets.UTF_8)) //тут є саме кодування
-//                .compact(); //це позволить зробити стрінгу яка й буде являтися токеном
-//        System.out.println(jwtToken);
-//        HttpHeaders headers=new HttpHeaders();
-//        headers.add("Authorization","Bearer "+jwtToken);//додаємо в хедер наш токен
-//        return new ResponseEntity<>(customer,headers,HttpStatus.ACCEPTED);
-////        return customerService.getCustomerAfterUpdateWithPassword(id);
-//    }
     @GetMapping("/getAllCustomers")
     public ResponseEntity<List<CustomerNoPasswordDTO>> getCustomers(){
         return customerService.getCustomersWithoutPassword();

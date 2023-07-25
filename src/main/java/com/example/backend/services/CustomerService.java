@@ -1,10 +1,8 @@
 package com.example.backend.services;
 
-
 import com.example.backend.dao.CustomerDAO;
 import com.example.backend.dao.RealtyObjectDAO;
 import com.example.backend.models.Customer;
-import com.example.backend.models.Price;
 import com.example.backend.models.Realty_Object;
 import com.example.backend.models.dto.CustomerDTO;
 import com.example.backend.models.dto.CustomerNoPasswordDTO;
@@ -17,7 +15,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
 import lombok.AllArgsConstructor;
-import org.hibernate.Hibernate;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,8 +27,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.transaction.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -46,7 +41,6 @@ public class CustomerService {
 
     BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
     private AuthenticationManager authenticationManager;//базовий об'єкт який займається процесом аутентифікації
-
 
     public ResponseEntity<String> ifPasswordMatchesSave(Integer customerID, String oldPassword, String newPassword){
         Customer customerToCheck=customerDAO.findCustomerById(customerID);
@@ -72,7 +66,6 @@ public class CustomerService {
         try {
             Realty_Object object=mapper.readValue(realty_object,Realty_Object.class);
             System.out.println(object);
-//            Realty_Object obj=new Realty_Object()
             List<Integer> customerFavoriteList =  customerToUpdate.getAdded_to_favorites();
             customerFavoriteList.add(object.getId());
             System.out.println(customerFavoriteList);
@@ -125,12 +118,6 @@ public class CustomerService {
         System.out.println(realty_objectList);
         for (Realty_Object el:realty_objectList) {
             if(el.getId()==realtyObjectId){
-//                for (Integer id:favoritesList){
-//                    if(Objects.equals(id, realtyObjectId)){
-//                        favoritesList.remove(id);
-//                        customer.setAdded_to_favorites(favoritesList);
-//                    }
-//                }
                 for(int i=0;i<favoritesList.size();i++){
                     if(Objects.equals(favoritesList.get(0), realtyObjectId)){
                         favoritesList.remove(favoritesList.get(0));
@@ -181,7 +168,6 @@ public class CustomerService {
     }
     public ResponseEntity<?> getCustomerAfterLoginUpdate(Integer customerID){
         Customer customer=customerDAO.findCustomerById(customerID);
-        System.out.println("service trig");
         System.out.println(customer.getName());
         System.out.println(customer.getLogin());
         Map<CustomerNoPasswordDTO,String> customerAndToken=new HashMap<>();
@@ -221,15 +207,6 @@ public class CustomerService {
         }
 
     }
-
-
-//    public ResponseEntity<Customer> getCustomerAfterUpdateWithPassword(Integer customerID){
-//        Customer customer=customerDAO.findCustomerById(customerID);
-//        return new ResponseEntity<>(customer,HttpStatus.OK);
-//    }
-//    public Customer getCustomerAfterUpdateWithPassword(Integer customerID){
-//            return customerDAO.findCustomerById(customerID);
-//    }
     public List<String> validateCustomer(@Valid Customer customer){
         ValidatorFactory factory = Validation.byDefaultProvider()
                 .configure()

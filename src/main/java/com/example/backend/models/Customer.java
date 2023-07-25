@@ -3,15 +3,11 @@ package com.example.backend.models;
 import lombok.*;
 
 import javax.persistence.*;
-//import javax.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
-import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 
 import jakarta.validation.constraints.*;
-import org.hibernate.validator.constraints.Length;
-
 
 @Getter
 @Setter
@@ -45,27 +41,20 @@ public class Customer{
     })
     private String password;
     @NotNull(message = "Phone number is required")
-//    @Size(min = 6, message = "Phone number min 6 length")
-//    @Min(value = 6,message = "Phone number min 6 length")
     @Min(value = 100000, message = "Phone number must be at least 6 digits long")
     private long phone_number;
 //    @NotBlank(message = "Avatar is required")
     private String avatar;
     @OneToMany(cascade = CascadeType.ALL,
             fetch = LAZY,
-//            fetch = EAGER,
             orphanRemoval = true)
     @JoinTable(name = "user_realtyObject",
             joinColumns = @JoinColumn(name="user_id"),
             inverseJoinColumns = @JoinColumn(name = "user_realty_object_id"))
     private List<Realty_Object> my_realty_objectList;
-//    @ElementCollection
     @ElementCollection(fetch = LAZY)
     private List<Integer> added_to_favorites=new ArrayList<>();
     private String role="ROLE_USER";// ролі в б мають починатися з ROLE_
-    public Customer(String name, String surname) {
-
-    }
 
 
 //    @Override

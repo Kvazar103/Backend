@@ -6,9 +6,6 @@ import lombok.*;
 
 
 import javax.persistence.*;
-//import javax.validation.constraints.Min;
-//import javax.validation.constraints.NotBlank;
-//import javax.validation.constraints.NotNull;
 import java.util.*;
 
 import jakarta.validation.constraints.Min;
@@ -43,13 +40,10 @@ public class Realty_Object {
     private int square;
     @NotBlank(message = "Details are required")
     private String details;
-
     private final Date creationDate = new Date();
     private String DateOfCreation;
-
     private Date updateDate=new Date();
     private String dateOfUpdate;
-//    @ElementCollection
     @ElementCollection(fetch = EAGER)
     private List<String> images=new ArrayList<>();
     @NotNull(message = "Real estate is required")
@@ -59,17 +53,6 @@ public class Realty_Object {
     @JoinColumn(name="price_id",referencedColumnName = "id")
     private Price price;
 
-    public Realty_Object(District district, String address, String apt_suite_building, int rooms, int square, String details, List<String> images, Real_Estate real_estate, Price price) {
-
-    }
-
-    public Realty_Object(Realty_Object realtyObject) {
-
-    }
-
-    //    public String getDateOfCreation() {
-//        return DateOfCreation;
-//    }
     public void setDateOfCreation(String dateOfCreation) {
         DateOfCreation = dateOfCreation;
     }
